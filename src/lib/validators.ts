@@ -41,7 +41,14 @@ export const settingsSchema = z.object({
   paymentReminder: z.string().optional(),
 });
 
+export const clinicalNoteSchema = z.object({
+  title: z.string().optional(),
+  content: z.string().min(1, "Content is required"),
+  sessionId: z.string().optional(),
+});
+
 export type PatientInput = z.infer<typeof patientSchema>;
 export type SessionInput = z.infer<typeof sessionSchema>;
 export type BookingInput = z.infer<typeof bookingSchema>;
 export type SettingsInput = z.infer<typeof settingsSchema>;
+export type ClinicalNoteInput = z.infer<typeof clinicalNoteSchema>;

@@ -94,7 +94,8 @@ model Patient {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  sessions TherapySession[]
+  sessions      TherapySession[]
+  clinicalNotes ClinicalNote[]
 
   @@map("patients")
 }
@@ -123,11 +124,35 @@ model TherapySession {
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
 
-  patient Patient? @relation(fields: [patientId], references: [id], onDelete: SetNull)
-  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  patient       Patient?       @relation(fields: [patientId], references: [id], onDelete: SetNull)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clinicalNotes ClinicalNote[]
 
   @@index([startTime])
   @@index([patientId])
   @@index([googleEventId])
   @@map("therapy_sessions")
+}
+
+enum NoteType {
+  TEXT
+  AUDIO_TRANSCRIPT
+}
+
+model ClinicalNote {
+  id        String   @id @default(cuid())
+  patientId String   @map("patient_id")
+  sessionId String?  @map("session_id")
+  type      NoteType @default(TEXT)
+  title     String?
+  content   String   @db.Text
+  summary   String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  patient Patient         @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  session TherapySession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  @@index([patientId])
+  @@map("clinical_notes")
 }
