@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 export const patientSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email").optional().or(z.literal("")),
-  phone: z.string().min(10, "Phone number must be at least 10 digits"),
+  name: z.string().min(1, "El nombre es requerido"),
+  email: z.string().email("Email inválido").optional().or(z.literal("")),
+  phone: z.string().min(10, "El teléfono debe tener al menos 10 dígitos"),
   notes: z.string().optional(),
 });
 
@@ -18,15 +18,15 @@ export const sessionSchema = z.object({
 
 export const bookingSchema = z.object({
   slug: z.string().min(1),
-  name: z.string().min(1, "Name is required"),
-  phone: z.string().min(10, "WhatsApp number is required"),
+  name: z.string().min(1, "El nombre es requerido"),
+  phone: z.string().min(10, "El número de WhatsApp es requerido"),
   email: z.string().email().optional().or(z.literal("")),
-  date: z.string().min(1, "Date is required"),
-  time: z.string().min(1, "Time slot is required"),
+  date: z.string().min(1, "La fecha es requerida"),
+  time: z.string().min(1, "El horario es requerido"),
 });
 
 export const settingsSchema = z.object({
-  bookingSlug: z.string().min(3, "Slug must be at least 3 characters").regex(/^[a-z0-9-]+$/, "Only lowercase letters, numbers, and hyphens"),
+  bookingSlug: z.string().min(3, "El slug debe tener al menos 3 caracteres").regex(/^[a-z0-9-]+$/, "Solo letras minúsculas, números y guiones"),
   sessionDuration: z.number().min(15).max(180),
   bufferTime: z.number().min(0).max(60),
   workingHours: z.record(z.string(), z.object({
@@ -43,7 +43,7 @@ export const settingsSchema = z.object({
 
 export const clinicalNoteSchema = z.object({
   title: z.string().optional(),
-  content: z.string().min(1, "Content is required"),
+  content: z.string().min(1, "El contenido es requerido"),
   sessionId: z.string().optional(),
 });
 

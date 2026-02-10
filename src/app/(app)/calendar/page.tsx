@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, isSameDay } from "date-fns";
+import { es } from "date-fns/locale";
 
 interface Patient {
   id: string;
@@ -69,10 +70,10 @@ export default function CalendarPage() {
     const res = await fetch("/api/calendar/sync", { method: "POST" });
     if (res.ok) {
       const data = await res.json();
-      toast.success(`Synced ${data.synced} events from Google Calendar`);
+      toast.success(`Se sincronizaron ${data.synced} eventos de Google Calendar`);
       fetchSessions();
     } else {
-      toast.error("Failed to sync calendar");
+      toast.error("Error al sincronizar calendario");
     }
     setSyncing(false);
   }
@@ -102,11 +103,11 @@ export default function CalendarPage() {
     });
 
     if (res.ok) {
-      toast.success("Session created");
+      toast.success("Sesión creada");
       setShowNewSession(false);
       fetchSessions();
     } else {
-      toast.error("Failed to create session");
+      toast.error("Error al crear sesión");
     }
   }
 
@@ -120,39 +121,39 @@ export default function CalendarPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Calendar</h1>
+        <h1 className="text-2xl font-semibold">Calendario</h1>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleSync} disabled={syncing}>
-            {syncing ? "Syncing..." : "Sync Google Calendar"}
+            {syncing ? "Sincronizando..." : "Sincronizar Google Calendar"}
           </Button>
           <Dialog open={showNewSession} onOpenChange={setShowNewSession}>
             <DialogTrigger asChild>
-              <Button>New Session</Button>
+              <Button>Nueva sesión</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>New Session</DialogTitle>
+                <DialogTitle>Nueva sesión</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleNewSession} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="date">Date</Label>
+                    <Label htmlFor="date">Fecha</Label>
                     <Input id="date" name="date" type="date" required defaultValue={format(new Date(), "yyyy-MM-dd")} />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="time">Time</Label>
+                    <Label htmlFor="time">Hora</Label>
                     <Input id="time" name="time" type="time" required defaultValue="09:00" />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="duration">Duration (minutes)</Label>
+                  <Label htmlFor="duration">Duración (minutos)</Label>
                   <Input id="duration" name="duration" type="number" defaultValue={50} min={15} max={180} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="patientId">Patient</Label>
+                  <Label htmlFor="patientId">Paciente</Label>
                   <Select name="patientId">
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a patient (optional)" />
+                      <SelectValue placeholder="Seleccionar paciente (opcional)" />
                     </SelectTrigger>
                     <SelectContent>
                       {patients.map((p) => (
@@ -162,10 +163,10 @@ export default function CalendarPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="notes">Notes</Label>
+                  <Label htmlFor="notes">Notas</Label>
                   <Textarea id="notes" name="notes" rows={2} />
                 </div>
-                <Button type="submit">Create Session</Button>
+                <Button type="submit">Crear sesión</Button>
               </form>
             </DialogContent>
           </Dialog>
@@ -175,16 +176,16 @@ export default function CalendarPage() {
       {/* Week navigation */}
       <div className="flex items-center gap-4">
         <Button variant="outline" size="sm" onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))}>
-          Previous
+          Anterior
         </Button>
         <Button variant="outline" size="sm" onClick={() => setCurrentWeek(startOfWeek(new Date(), { weekStartsOn: 1 }))}>
-          Today
+          Hoy
         </Button>
         <Button variant="outline" size="sm" onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))}>
-          Next
+          Siguiente
         </Button>
         <span className="text-sm text-muted-foreground">
-          {format(currentWeek, "dd MMM")} - {format(addDays(currentWeek, 6), "dd MMM yyyy")}
+          {format(currentWeek, "dd MMM", { locale: es })} - {format(addDays(currentWeek, 6), "dd MMM yyyy", { locale: es })}
         </span>
       </div>
 
@@ -201,7 +202,7 @@ export default function CalendarPage() {
                   isSameDay(day, new Date()) ? "bg-primary/5 text-primary" : ""
                 }`}
               >
-                <div>{format(day, "EEE")}</div>
+                <div>{format(day, "EEE", { locale: es })}</div>
                 <div className="text-lg">{format(day, "d")}</div>
               </div>
             ))}
@@ -223,7 +224,7 @@ export default function CalendarPage() {
                         className={`rounded px-1.5 py-0.5 text-xs text-white ${statusColors[s.status] || "bg-blue-500"}`}
                       >
                         <div className="font-medium truncate">
-                          {format(new Date(s.startTime), "HH:mm")} {s.patient?.name || s.guestName || "Session"}
+                          {format(new Date(s.startTime), "HH:mm")} {s.patient?.name || s.guestName || "Sesión"}
                         </div>
                       </div>
                     ))}

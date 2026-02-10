@@ -11,7 +11,7 @@ export default function LoginPage() {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">PsychPractice</CardTitle>
           <CardDescription>
-            Sign in to manage your calendar, patients, and bookings
+            Inicia sesión para gestionar tu calendario, pacientes y citas
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -38,10 +38,10 @@ export default function LoginPage() {
                 fill="#EA4335"
               />
             </svg>
-            Sign in with Google
+            Iniciar sesión con Google
           </Button>
           <p className="mt-4 text-center text-sm text-muted-foreground">
-            This will connect your Google Calendar for scheduling
+            Esto conectará tu Google Calendar para la agenda
           </p>
         </CardContent>
       </Card>

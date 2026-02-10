@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { SESSION_STATUS_LABELS } from "@/lib/constants";
 import {
   FileText,
   Mic,
@@ -124,22 +125,22 @@ export default function PatientDetailPage() {
       const updated = await res.json();
       setPatient({ ...patient!, ...updated });
       setEditing(false);
-      toast.success("Patient updated");
+      toast.success("Paciente actualizado");
     } else {
-      toast.error("Failed to update patient");
+      toast.error("Error al actualizar paciente");
     }
     setSaving(false);
   }
 
   async function handleDelete() {
-    if (!confirm("Are you sure you want to remove this patient?")) return;
+    if (!confirm("¿Estás segura de que deseas eliminar este paciente?")) return;
 
     const res = await fetch(`/api/patients/${params.id}`, { method: "DELETE" });
     if (res.ok) {
-      toast.success("Patient removed");
+      toast.success("Paciente eliminado");
       router.push("/patients");
     } else {
-      toast.error("Failed to remove patient");
+      toast.error("Error al eliminar paciente");
     }
   }
 
@@ -165,28 +166,28 @@ export default function PatientDetailPage() {
     });
 
     if (res.ok) {
-      toast.success(editingNote ? "Note updated" : "Note created");
+      toast.success(editingNote ? "Nota actualizada" : "Nota creada");
       setNoteDialogOpen(false);
       setEditingNote(null);
       fetchNotes();
     } else {
-      toast.error("Failed to save note");
+      toast.error("Error al guardar nota");
     }
     setNoteSaving(false);
   }
 
   async function handleDeleteNote(noteId: string) {
-    if (!confirm("Delete this note?")) return;
+    if (!confirm("¿Eliminar esta nota?")) return;
 
     const res = await fetch(`/api/patients/${params.id}/notes/${noteId}`, {
       method: "DELETE",
     });
 
     if (res.ok) {
-      toast.success("Note deleted");
+      toast.success("Nota eliminada");
       fetchNotes();
     } else {
-      toast.error("Failed to delete note");
+      toast.error("Error al eliminar nota");
     }
   }
 
@@ -196,7 +197,7 @@ export default function PatientDetailPage() {
     const file = new File([blob], "recording.webm", { type: blob.type });
     const formData = new FormData();
     formData.append("audio", file);
-    formData.append("title", `Session recording — ${format(new Date(), "dd/MM/yyyy")}`);
+    formData.append("title", `Grabación de sesión — ${format(new Date(), "dd/MM/yyyy")}`);
 
     const res = await fetch(`/api/patients/${params.id}/notes/transcribe`, {
       method: "POST",
@@ -204,10 +205,10 @@ export default function PatientDetailPage() {
     });
 
     if (res.ok) {
-      toast.success("Audio transcribed successfully");
+      toast.success("Audio transcrito exitosamente");
       fetchNotes();
     } else {
-      toast.error("Failed to transcribe audio");
+      toast.error("Error al transcribir audio");
     }
 
     setTranscribing(false);
@@ -240,7 +241,7 @@ export default function PatientDetailPage() {
         setRecordingTime((prev) => prev + 1);
       }, 1000);
     } catch {
-      toast.error("Could not access microphone");
+      toast.error("No se pudo acceder al micrófono");
     }
   }
 
@@ -275,8 +276,8 @@ export default function PatientDetailPage() {
     });
   }
 
-  if (loading) return <p className="text-muted-foreground">Loading...</p>;
-  if (!patient) return <p className="text-muted-foreground">Patient not found</p>;
+  if (loading) return <p className="text-muted-foreground">Cargando...</p>;
+  if (!patient) return <p className="text-muted-foreground">Paciente no encontrado</p>;
 
   const statusColors: Record<string, string> = {
     SCHEDULED: "bg-blue-100 text-blue-800",
@@ -292,19 +293,19 @@ export default function PatientDetailPage() {
         <h1 className="text-2xl font-semibold">{patient.name}</h1>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setEditing(!editing)}>
-            {editing ? "Cancel" : "Edit"}
+            {editing ? "Cancelar" : "Editar"}
           </Button>
           <Button variant="destructive" onClick={handleDelete}>
-            Remove
+            Eliminar
           </Button>
         </div>
       </div>
 
       <Tabs defaultValue="info">
         <TabsList>
-          <TabsTrigger value="info">Info</TabsTrigger>
-          <TabsTrigger value="clinical-history">Clinical History</TabsTrigger>
-          <TabsTrigger value="sessions">Sessions</TabsTrigger>
+          <TabsTrigger value="info">Información</TabsTrigger>
+          <TabsTrigger value="clinical-history">Historia Clínica</TabsTrigger>
+          <TabsTrigger value="sessions">Sesiones</TabsTrigger>
         </TabsList>
 
         {/* Info Tab */}
@@ -314,11 +315,11 @@ export default function PatientDetailPage() {
               <CardContent className="pt-6">
                 <form onSubmit={handleSave} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Name</Label>
+                    <Label htmlFor="name">Nombre</Label>
                     <Input id="name" name="name" defaultValue={patient.name} required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone">WhatsApp Number</Label>
+                    <Label htmlFor="phone">Número de WhatsApp</Label>
                     <Input id="phone" name="phone" defaultValue={patient.phone} required />
                   </div>
                   <div className="space-y-2">
@@ -331,7 +332,7 @@ export default function PatientDetailPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="notes">Notes</Label>
+                    <Label htmlFor="notes">Notas</Label>
                     <Textarea
                       id="notes"
                       name="notes"
@@ -340,7 +341,7 @@ export default function PatientDetailPage() {
                     />
                   </div>
                   <Button type="submit" disabled={saving}>
-                    {saving ? "Saving..." : "Save Changes"}
+                    {saving ? "Guardando..." : "Guardar cambios"}
                   </Button>
                 </form>
               </CardContent>
@@ -349,16 +350,16 @@ export default function PatientDetailPage() {
             <Card>
               <CardContent className="space-y-2 pt-6">
                 <p>
-                  <span className="font-medium">Phone:</span> {patient.phone}
+                  <span className="font-medium">Teléfono:</span> {patient.phone}
                 </p>
                 {patient.email && (
                   <p>
-                    <span className="font-medium">Email:</span> {patient.email}
+                    <span className="font-medium">Correo:</span> {patient.email}
                   </p>
                 )}
                 {patient.notes && (
                   <p>
-                    <span className="font-medium">Notes:</span> {patient.notes}
+                    <span className="font-medium">Notas:</span> {patient.notes}
                   </p>
                 )}
               </CardContent>
@@ -378,12 +379,12 @@ export default function PatientDetailPage() {
                 }}
               >
                 <Plus className="mr-2 size-4" />
-                New Note
+                Nueva nota
               </Button>
               {transcribing ? (
                 <Button variant="outline" disabled>
                   <Loader2 className="mr-2 size-4 animate-spin" />
-                  Transcribing...
+                  Transcribiendo...
                 </Button>
               ) : recording ? (
                 <Button
@@ -392,25 +393,25 @@ export default function PatientDetailPage() {
                   className="animate-pulse"
                 >
                   <Square className="mr-2 size-4" />
-                  Stop — {String(Math.floor(recordingTime / 60)).padStart(2, "0")}:
+                  Detener — {String(Math.floor(recordingTime / 60)).padStart(2, "0")}:
                   {String(recordingTime % 60).padStart(2, "0")}
                 </Button>
               ) : (
                 <Button variant="outline" onClick={startRecording}>
                   <Mic className="mr-2 size-4" />
-                  Record
+                  Grabar
                 </Button>
               )}
             </div>
 
             {/* Notes timeline */}
             {notesLoading ? (
-              <p className="text-muted-foreground">Loading notes...</p>
+              <p className="text-muted-foreground">Cargando notas...</p>
             ) : notes.length === 0 ? (
               <Card>
                 <CardContent className="py-8 text-center">
                   <p className="text-muted-foreground">
-                    No clinical notes yet. Create a text note or upload an audio recording.
+                    Sin notas clínicas aún. Crea una nota de texto o graba un audio.
                   </p>
                 </CardContent>
               </Card>
@@ -430,16 +431,16 @@ export default function PatientDetailPage() {
                                 <FileText className="text-muted-foreground size-4 shrink-0" />
                               )}
                               <span className="truncate font-medium">
-                                {note.title || "Untitled"}
+                                {note.title || "Sin título"}
                               </span>
                               <Badge variant="secondary" className="shrink-0 text-xs">
-                                {note.type === "AUDIO_TRANSCRIPT" ? "Transcript" : "Text"}
+                                {note.type === "AUDIO_TRANSCRIPT" ? "Transcripción" : "Texto"}
                               </Badge>
                             </div>
                             <p className="text-muted-foreground mt-1 text-xs">
                               {format(new Date(note.createdAt), "dd/MM/yyyy HH:mm")}
                               {note.session &&
-                                ` — Session: ${format(new Date(note.session.startTime), "dd/MM/yyyy")}`}
+                                ` — Sesión: ${format(new Date(note.session.startTime), "dd/MM/yyyy")}`}
                             </p>
                           </div>
                           <div className="flex shrink-0 gap-1">
@@ -478,7 +479,7 @@ export default function PatientDetailPage() {
                               <Separator className="my-3" />
                               <div>
                                 <p className="text-muted-foreground mb-1 text-xs font-semibold uppercase tracking-wide">
-                                  AI Summary
+                                  Resumen IA
                                 </p>
                                 <p className="text-sm whitespace-pre-wrap">{note.summary}</p>
                               </div>
@@ -495,12 +496,12 @@ export default function PatientDetailPage() {
                               {isExpanded ? (
                                 <>
                                   <ChevronUp className="mr-1 size-3" />
-                                  Show less
+                                  Ver menos
                                 </>
                               ) : (
                                 <>
                                   <ChevronDown className="mr-1 size-3" />
-                                  Show more
+                                  Ver más
                                 </>
                               )}
                             </Button>
@@ -518,42 +519,42 @@ export default function PatientDetailPage() {
           <Dialog open={noteDialogOpen} onOpenChange={setNoteDialogOpen}>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>{editingNote ? "Edit Note" : "New Note"}</DialogTitle>
+                <DialogTitle>{editingNote ? "Editar nota" : "Nueva nota"}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSaveNote} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="note-title">Title</Label>
+                  <Label htmlFor="note-title">Título</Label>
                   <Input
                     id="note-title"
                     name="title"
                     defaultValue={editingNote?.title ?? ""}
-                    placeholder="Session notes, intake, follow-up..."
+                    placeholder="Notas de sesión, ingreso, seguimiento..."
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="note-content">Content</Label>
+                  <Label htmlFor="note-content">Contenido</Label>
                   <Textarea
                     id="note-content"
                     name="content"
                     defaultValue={editingNote?.content ?? ""}
                     rows={8}
                     required
-                    placeholder="Write your clinical notes here..."
+                    placeholder="Escribe tus notas clínicas aquí..."
                   />
                 </div>
                 {patient.sessions.length > 0 && (
                   <div className="space-y-2">
-                    <Label htmlFor="note-session">Link to session (optional)</Label>
+                    <Label htmlFor="note-session">Vincular a sesión (opcional)</Label>
                     <select
                       id="note-session"
                       name="sessionId"
                       defaultValue={editingNote?.sessionId ?? ""}
                       className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm"
                     >
-                      <option value="">No session</option>
+                      <option value="">Sin sesión</option>
                       {patient.sessions.map((s) => (
                         <option key={s.id} value={s.id}>
-                          {format(new Date(s.startTime), "dd/MM/yyyy HH:mm")} — {s.status}
+                          {format(new Date(s.startTime), "dd/MM/yyyy HH:mm")} — {SESSION_STATUS_LABELS[s.status] ?? s.status}
                         </option>
                       ))}
                     </select>
@@ -561,7 +562,7 @@ export default function PatientDetailPage() {
                 )}
                 <DialogFooter>
                   <Button type="submit" disabled={noteSaving}>
-                    {noteSaving ? "Saving..." : "Save"}
+                    {noteSaving ? "Guardando..." : "Guardar"}
                   </Button>
                 </DialogFooter>
               </form>
@@ -573,11 +574,11 @@ export default function PatientDetailPage() {
         <TabsContent value="sessions">
           <Card>
             <CardHeader>
-              <CardTitle>Session History</CardTitle>
+              <CardTitle>Historial de sesiones</CardTitle>
             </CardHeader>
             <CardContent>
               {patient.sessions.length === 0 ? (
-                <p className="text-muted-foreground">No sessions yet</p>
+                <p className="text-muted-foreground">Sin sesiones aún</p>
               ) : (
                 <div className="space-y-2">
                   {patient.sessions.map((s) => (
@@ -595,7 +596,7 @@ export default function PatientDetailPage() {
                         )}
                       </div>
                       <Badge className={statusColors[s.status] ?? ""} variant="secondary">
-                        {s.status}
+                        {SESSION_STATUS_LABELS[s.status] ?? s.status}
                       </Badge>
                     </div>
                   ))}

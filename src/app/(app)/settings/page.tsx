@@ -29,13 +29,13 @@ interface SettingsData {
 
 const DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 const DAY_LABELS: Record<string, string> = {
-  monday: "Monday",
-  tuesday: "Tuesday",
-  wednesday: "Wednesday",
-  thursday: "Thursday",
-  friday: "Friday",
-  saturday: "Saturday",
-  sunday: "Sunday",
+  monday: "Lunes",
+  tuesday: "Martes",
+  wednesday: "Miércoles",
+  thursday: "Jueves",
+  friday: "Viernes",
+  saturday: "Sábado",
+  sunday: "Domingo",
 };
 
 const defaultWorkingHours: Record<string, WorkingDay> = {
@@ -78,10 +78,10 @@ export default function SettingsPage() {
     });
 
     if (res.ok) {
-      toast.success("Settings saved");
+      toast.success("Configuración guardada");
     } else {
       const err = await res.json();
-      toast.error(err.error?.fieldErrors?.[0] || "Failed to save settings");
+      toast.error(err.error?.fieldErrors?.[0] || "Error al guardar configuración");
     }
     setSaving(false);
   }
@@ -97,7 +97,7 @@ export default function SettingsPage() {
     });
   }
 
-  if (loading || !settings) return <p className="text-muted-foreground">Loading settings...</p>;
+  if (loading || !settings) return <p className="text-muted-foreground">Cargando configuración...</p>;
 
   const bookingUrl = typeof window !== "undefined"
     ? `${window.location.origin}/book/${settings.bookingSlug}`
@@ -105,24 +105,24 @@ export default function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="text-2xl font-semibold">Settings</h1>
+      <h1 className="text-2xl font-semibold">Configuración</h1>
 
       {/* Booking */}
       <Card>
         <CardHeader>
-          <CardTitle>Booking Page</CardTitle>
-          <CardDescription>Your public booking URL for patients</CardDescription>
+          <CardTitle>Página de reservas</CardTitle>
+          <CardDescription>Tu URL pública de reservas para pacientes</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="slug">Booking slug</Label>
+            <Label htmlFor="slug">Slug de reserva</Label>
             <Input
               id="slug"
               value={settings.bookingSlug}
               onChange={(e) => setSettings({ ...settings, bookingSlug: e.target.value })}
             />
             <p className="text-xs text-muted-foreground">
-              Your booking page: <span className="font-mono">{bookingUrl}</span>
+              Tu página de reservas: <span className="font-mono">{bookingUrl}</span>
             </p>
           </div>
         </CardContent>
@@ -131,12 +131,12 @@ export default function SettingsPage() {
       {/* Session settings */}
       <Card>
         <CardHeader>
-          <CardTitle>Session Settings</CardTitle>
+          <CardTitle>Configuración de sesiones</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="duration">Session duration (min)</Label>
+              <Label htmlFor="duration">Duración de sesión (min)</Label>
               <Input
                 id="duration"
                 type="number"
@@ -147,7 +147,7 @@ export default function SettingsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="buffer">Buffer between sessions (min)</Label>
+              <Label htmlFor="buffer">Tiempo entre sesiones (min)</Label>
               <Input
                 id="buffer"
                 type="number"
@@ -164,8 +164,8 @@ export default function SettingsPage() {
       {/* Working hours */}
       <Card>
         <CardHeader>
-          <CardTitle>Working Hours</CardTitle>
-          <CardDescription>Set your available hours for each day</CardDescription>
+          <CardTitle>Horario laboral</CardTitle>
+          <CardDescription>Configura tus horarios disponibles para cada día</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {DAYS.map((day) => (
@@ -186,7 +186,7 @@ export default function SettingsPage() {
                 disabled={!settings.workingHours[day]?.enabled}
                 className="w-32"
               />
-              <span className="text-sm text-muted-foreground">to</span>
+              <span className="text-sm text-muted-foreground">a</span>
               <Input
                 type="time"
                 value={settings.workingHours[day]?.end ?? "18:00"}
@@ -202,8 +202,8 @@ export default function SettingsPage() {
       {/* Reminders */}
       <Card>
         <CardHeader>
-          <CardTitle>WhatsApp Reminders</CardTitle>
-          <CardDescription>Configure automatic reminders sent to patients via WhatsApp</CardDescription>
+          <CardTitle>Recordatorios de WhatsApp</CardTitle>
+          <CardDescription>Configura los recordatorios automáticos enviados a los pacientes por WhatsApp</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -214,7 +214,7 @@ export default function SettingsPage() {
                 onChange={(e) => setSettings({ ...settings, reminder24h: e.target.checked })}
                 className="rounded"
               />
-              <span className="text-sm">Send reminder 24 hours before session</span>
+              <span className="text-sm">Enviar recordatorio 24 horas antes</span>
             </label>
             <label className="flex items-center gap-2">
               <input
@@ -223,29 +223,29 @@ export default function SettingsPage() {
                 onChange={(e) => setSettings({ ...settings, reminder1h: e.target.checked })}
                 className="rounded"
               />
-              <span className="text-sm">Send reminder 1 hour before session</span>
+              <span className="text-sm">Enviar recordatorio 1 hora antes</span>
             </label>
           </div>
 
           <Separator />
 
           <div className="space-y-2">
-            <Label htmlFor="reminderMsg">Custom reminder message (optional)</Label>
+            <Label htmlFor="reminderMsg">Mensaje de recordatorio personalizado (opcional)</Label>
             <Textarea
               id="reminderMsg"
               value={settings.reminderMessage ?? ""}
               onChange={(e) => setSettings({ ...settings, reminderMessage: e.target.value })}
-              placeholder="e.g., Please arrive 5 minutes early"
+              placeholder="ej., Por favor llega 5 minutos antes"
               rows={2}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="paymentMsg">Payment reminder message (optional)</Label>
+            <Label htmlFor="paymentMsg">Mensaje de recordatorio de pago (opcional)</Label>
             <Textarea
               id="paymentMsg"
               value={settings.paymentReminder ?? ""}
               onChange={(e) => setSettings({ ...settings, paymentReminder: e.target.value })}
-              placeholder="e.g., Payment of R$200 is due before the session via PIX"
+              placeholder="ej., El pago de R$200 vence antes de la sesión por PIX"
               rows={2}
             />
           </div>
@@ -253,7 +253,7 @@ export default function SettingsPage() {
       </Card>
 
       <Button onClick={handleSave} disabled={saving} className="w-full">
-        {saving ? "Saving..." : "Save Settings"}
+        {saving ? "Guardando..." : "Guardar configuración"}
       </Button>
     </div>
   );

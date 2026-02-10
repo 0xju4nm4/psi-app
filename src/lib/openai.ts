@@ -8,7 +8,7 @@ export async function transcribeAudio(file: File): Promise<string> {
   const transcription = await openai.audio.transcriptions.create({
     file,
     model: "whisper-1",
-    language: "pt",
+    language: "es",
   });
 
   return transcription.text;
@@ -22,15 +22,15 @@ export async function summarizeTranscript(
     messages: [
       {
         role: "system",
-        content: `You are a clinical psychology assistant. Given a therapy session transcript, produce a structured summary in Portuguese (Brazil). Include:
+        content: `Eres un asistente de psicología clínica. Dado un transcripción de sesión terapéutica, produce un resumen estructurado en español. Incluye:
 
-- **Temas principais**: Key topics discussed
-- **Estado emocional do paciente**: Patient's emotional state
-- **Intervenções realizadas**: Therapeutic interventions used
-- **Progresso observado**: Progress or changes noted
-- **Pontos para acompanhamento**: Follow-up points for next session
+- **Temas principales**: Temas clave discutidos
+- **Estado emocional del paciente**: Estado emocional observado
+- **Intervenciones realizadas**: Técnicas e intervenciones terapéuticas utilizadas
+- **Progreso observado**: Avances o cambios notados
+- **Puntos de seguimiento**: Puntos a dar seguimiento en la próxima sesión
 
-Be concise and professional. Use clinical language appropriate for a psychologist's records.`,
+Sé conciso y profesional. Usa lenguaje clínico apropiado para los registros de un psicólogo. Responde siempre en español.`,
       },
       {
         role: "user",

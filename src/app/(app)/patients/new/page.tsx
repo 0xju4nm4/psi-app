@@ -32,11 +32,11 @@ export default function NewPatientPage() {
     });
 
     if (res.ok) {
-      toast.success("Patient created successfully");
+      toast.success("Paciente creado exitosamente");
       router.push("/patients");
     } else {
       const err = await res.json();
-      toast.error(err.error?.fieldErrors?.name?.[0] || "Failed to create patient");
+      toast.error(err.error?.fieldErrors?.name?.[0] || "Error al crear paciente");
     }
     setLoading(false);
   }
@@ -45,32 +45,32 @@ export default function NewPatientPage() {
     <div className="mx-auto max-w-lg">
       <Card>
         <CardHeader>
-          <CardTitle>New Patient</CardTitle>
+          <CardTitle>Nuevo paciente</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name *</Label>
+              <Label htmlFor="name">Nombre *</Label>
               <Input id="name" name="name" required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phone">WhatsApp Number *</Label>
-              <Input id="phone" name="phone" placeholder="+5511999999999" required />
+              <Label htmlFor="phone">Número de WhatsApp *</Label>
+              <Input id="phone" name="phone" placeholder="+5491199999999" required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Correo electrónico</Label>
               <Input id="email" name="email" type="email" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes">Notas</Label>
               <Textarea id="notes" name="notes" rows={3} />
             </div>
             <div className="flex gap-2">
               <Button type="submit" disabled={loading}>
-                {loading ? "Creating..." : "Create Patient"}
+                {loading ? "Creando..." : "Crear paciente"}
               </Button>
               <Button type="button" variant="outline" onClick={() => router.back()}>
-                Cancel
+                Cancelar
               </Button>
             </div>
           </form>

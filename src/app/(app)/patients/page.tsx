@@ -37,24 +37,24 @@ export default function PatientsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Patients</h1>
+        <h1 className="text-2xl font-semibold">Pacientes</h1>
         <Link href="/patients/new">
-          <Button>Add Patient</Button>
+          <Button>Agregar paciente</Button>
         </Link>
       </div>
 
       <Input
-        placeholder="Search patients by name, email, or phone..."
+        placeholder="Buscar pacientes por nombre, correo o teléfono..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         className="max-w-md"
       />
 
       {loading ? (
-        <p className="text-muted-foreground">Loading patients...</p>
+        <p className="text-muted-foreground">Cargando pacientes...</p>
       ) : patients.length === 0 ? (
         <p className="text-muted-foreground">
-          {search ? "No patients found matching your search." : "No patients yet. Add your first patient!"}
+          {search ? "No se encontraron pacientes con esa búsqueda." : "Sin pacientes aún. ¡Agrega tu primer paciente!"}
         </p>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -69,7 +69,7 @@ export default function PatientsPage() {
                   )}
                   {patient.sessions.length > 0 && (
                     <Badge variant="secondary" className="mt-2">
-                      Next: {format(new Date(patient.sessions[0].startTime), "dd/MM HH:mm")}
+                      Próxima: {format(new Date(patient.sessions[0].startTime), "dd/MM HH:mm")}
                     </Badge>
                   )}
                 </CardContent>

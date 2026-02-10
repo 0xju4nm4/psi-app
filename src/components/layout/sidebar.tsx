@@ -7,10 +7,10 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboardIcon },
-  { href: "/calendar", label: "Calendar", icon: CalendarIcon },
-  { href: "/patients", label: "Patients", icon: UsersIcon },
-  { href: "/settings", label: "Settings", icon: SettingsIcon },
+  { href: "/dashboard", label: "Panel", icon: LayoutDashboardIcon },
+  { href: "/calendar", label: "Calendario", icon: CalendarIcon },
+  { href: "/patients", label: "Pacientes", icon: UsersIcon },
+  { href: "/settings", label: "Configuración", icon: SettingsIcon },
 ];
 
 export function Sidebar() {
@@ -51,7 +51,7 @@ export function Sidebar() {
           onClick={() => signOut({ callbackUrl: "/login" })}
         >
           <LogOutIcon className="h-4 w-4" />
-          Sign out
+          Cerrar sesión
         </Button>
       </div>
     </aside>

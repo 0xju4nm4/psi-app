@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { format, addDays } from "date-fns";
+import { es } from "date-fns/locale";
 
 interface TimeSlot {
   start: string;
@@ -46,7 +47,7 @@ export default function BookingPage() {
           setPractitionerName(data.practitionerName || "");
         }
       })
-      .catch(() => setError("Failed to load available times"))
+      .catch(() => setError("Error al cargar horarios disponibles"))
       .finally(() => setLoadingSlots(false));
   }, [date, slug]);
 
@@ -77,7 +78,7 @@ export default function BookingPage() {
       setBooked(true);
     } else {
       const data = await res.json();
-      setError(data.error || "Failed to book session");
+      setError(data.error || "Error al reservar sesión");
     }
     setBooking(false);
   }
@@ -87,11 +88,11 @@ export default function BookingPage() {
       <div className="flex min-h-screen items-center justify-center bg-muted/50 p-4">
         <Card className="w-full max-w-md text-center">
           <CardHeader>
-            <CardTitle className="text-green-600">Session Booked!</CardTitle>
+            <CardTitle className="text-green-600">¡Sesión reservada!</CardTitle>
             <CardDescription>
-              Your session has been confirmed for{" "}
-              {date && format(date, "EEEE, MMMM d")} at {selectedSlot?.display.split(" - ")[0]}.
-              You&apos;ll receive a WhatsApp reminder before your session.
+              Tu sesión ha sido confirmada para{" "}
+              {date && format(date, "EEEE, d 'de' MMMM", { locale: es })} a las {selectedSlot?.display.split(" - ")[0]}.
+              Recibirás un recordatorio por WhatsApp antes de tu sesión.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -104,15 +105,15 @@ export default function BookingPage() {
       <Card className="w-full max-w-2xl">
         <CardHeader className="text-center">
           <CardTitle>
-            {practitionerName ? `Book a session with ${practitionerName}` : "Book a Session"}
+            {practitionerName ? `Reservar sesión con ${practitionerName}` : "Reservar una sesión"}
           </CardTitle>
-          <CardDescription>Select a date and time for your appointment</CardDescription>
+          <CardDescription>Selecciona una fecha y hora para tu cita</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-6 md:grid-cols-2">
             {/* Date picker */}
             <div>
-              <Label className="mb-2 block">Select a date</Label>
+              <Label className="mb-2 block">Selecciona una fecha</Label>
               <Calendar
                 mode="single"
                 selected={date}
@@ -127,12 +128,12 @@ export default function BookingPage() {
               {date && (
                 <>
                   <Label className="block">
-                    Available times for {format(date, "EEEE, MMMM d")}
+                    Horarios disponibles para {format(date, "EEEE, d 'de' MMMM", { locale: es })}
                   </Label>
                   {loadingSlots ? (
-                    <p className="text-sm text-muted-foreground">Loading...</p>
+                    <p className="text-sm text-muted-foreground">Cargando...</p>
                   ) : slots.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">No available times on this date</p>
+                    <p className="text-sm text-muted-foreground">Sin horarios disponibles en esta fecha</p>
                   ) : (
                     <div className="grid grid-cols-2 gap-2">
                       {slots.map((slot) => (
@@ -153,19 +154,19 @@ export default function BookingPage() {
               {selectedSlot && (
                 <form onSubmit={handleBook} className="space-y-3 border-t pt-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Your name *</Label>
+                    <Label htmlFor="name">Tu nombre *</Label>
                     <Input id="name" name="name" required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone">WhatsApp number *</Label>
+                    <Label htmlFor="phone">Número de WhatsApp *</Label>
                     <Input id="phone" name="phone" placeholder="+5511999999999" required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email (optional)</Label>
+                    <Label htmlFor="email">Correo electrónico (opcional)</Label>
                     <Input id="email" name="email" type="email" />
                   </div>
                   <Button type="submit" className="w-full" disabled={booking}>
-                    {booking ? "Booking..." : `Book ${selectedSlot.display}`}
+                    {booking ? "Reservando..." : `Reservar ${selectedSlot.display}`}
                   </Button>
                 </form>
               )}

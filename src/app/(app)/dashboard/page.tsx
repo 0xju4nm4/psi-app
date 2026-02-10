@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { format, startOfDay, endOfDay, startOfWeek, addDays } from "date-fns";
+import { es } from "date-fns/locale";
+import { SESSION_STATUS_LABELS } from "@/lib/constants";
 
 interface Patient {
   id: string;
@@ -66,17 +68,17 @@ export default function DashboardPage() {
     (s) => s.status === "COMPLETED" || new Date(s.endTime) < new Date()
   );
 
-  if (loading) return <p className="text-muted-foreground">Loading dashboard...</p>;
+  if (loading) return <p className="text-muted-foreground">Cargando panel...</p>;
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Dashboard</h1>
+      <h1 className="text-2xl font-semibold">Panel</h1>
 
       {/* Quick stats */}
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Today&apos;s Sessions</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Sesiones de hoy</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{todaySessions.filter((s) => s.status !== "CANCELLED").length}</p>
@@ -84,7 +86,7 @@ export default function DashboardPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">This Week</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Esta semana</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{weekSessions.filter((s) => s.status !== "CANCELLED").length}</p>
@@ -92,7 +94,7 @@ export default function DashboardPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Upcoming Today</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Próximas hoy</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{upcomingToday.length}</p>
@@ -102,8 +104,8 @@ export default function DashboardPage() {
 
       {/* Quick actions */}
       <div className="flex flex-wrap gap-2">
-        <Link href="/patients/new"><Button variant="outline">Add Patient</Button></Link>
-        <Link href="/calendar"><Button variant="outline">View Calendar</Button></Link>
+        <Link href="/patients/new"><Button variant="outline">Agregar paciente</Button></Link>
+        <Link href="/calendar"><Button variant="outline">Ver calendario</Button></Link>
         {settings?.bookingSlug && (
           <Button
             variant="outline"
@@ -112,7 +114,7 @@ export default function DashboardPage() {
               navigator.clipboard.writeText(url);
             }}
           >
-            Copy Booking Link
+            Copiar enlace de reserva
           </Button>
         )}
       </div>
@@ -122,11 +124,11 @@ export default function DashboardPage() {
       {/* Today's schedule */}
       <Card>
         <CardHeader>
-          <CardTitle>Today&apos;s Schedule - {format(new Date(), "EEEE, MMMM d")}</CardTitle>
+          <CardTitle>Agenda de hoy - {format(new Date(), "EEEE, d 'de' MMMM", { locale: es })}</CardTitle>
         </CardHeader>
         <CardContent>
           {todaySessions.length === 0 ? (
-            <p className="text-muted-foreground">No sessions scheduled for today</p>
+            <p className="text-muted-foreground">Sin sesiones programadas para hoy</p>
           ) : (
             <div className="space-y-3">
               {todaySessions
@@ -141,11 +143,11 @@ export default function DashboardPage() {
                         {format(new Date(s.startTime), "HH:mm")} - {format(new Date(s.endTime), "HH:mm")}
                       </div>
                       <div>
-                        <p className="font-medium">{s.patient?.name || s.guestName || "Session"}</p>
+                        <p className="font-medium">{s.patient?.name || s.guestName || "Sesión"}</p>
                       </div>
                     </div>
                     <Badge className={statusColors[s.status] ?? ""} variant="secondary">
-                      {s.status}
+                      {SESSION_STATUS_LABELS[s.status] ?? s.status}
                     </Badge>
                   </div>
                 ))}
@@ -157,7 +159,7 @@ export default function DashboardPage() {
       {/* Week overview */}
       <Card>
         <CardHeader>
-          <CardTitle>This Week</CardTitle>
+          <CardTitle>Esta semana</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-7 gap-2">
@@ -175,9 +177,9 @@ export default function DashboardPage() {
                   key={i}
                   className={`rounded-md border p-2 text-center ${isToday ? "border-primary bg-primary/5" : ""}`}
                 >
-                  <div className="text-xs text-muted-foreground">{format(day, "EEE")}</div>
+                  <div className="text-xs text-muted-foreground">{format(day, "EEE", { locale: es })}</div>
                   <div className="text-lg font-semibold">{format(day, "d")}</div>
-                  <div className="text-xs text-muted-foreground">{count} session{count !== 1 ? "s" : ""}</div>
+                  <div className="text-xs text-muted-foreground">{count} sesión{count !== 1 ? "es" : ""}</div>
                 </div>
               );
             })}
