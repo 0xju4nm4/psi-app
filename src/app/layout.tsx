@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PsychPractice",
-  description: "Psychology practice management - Calendar, patients & booking",
+  title: "PSI APP",
+  description: "Psico App",
 };
 
 export default function RootLayout({
