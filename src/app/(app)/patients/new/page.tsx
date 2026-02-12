@@ -54,7 +54,7 @@ export default function NewPatientPage() {
               <Input id="name" name="name" required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phone">Número de WhatsApp *</Label>
+              <Label htmlFor="phone">Número de teléfono *</Label>
               <Input id="phone" name="phone" placeholder="+5491199999999" required />
             </div>
             <div className="space-y-2">

@@ -99,34 +99,9 @@ export default function SettingsPage() {
 
   if (loading || !settings) return <p className="text-muted-foreground">Cargando configuración...</p>;
 
-  const bookingUrl = typeof window !== "undefined"
-    ? `${window.location.origin}/book/${settings.bookingSlug}`
-    : `/book/${settings.bookingSlug}`;
-
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <h1 className="text-2xl font-semibold">Configuración</h1>
-
-      {/* Booking */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Página de reservas</CardTitle>
-          <CardDescription>Tu URL pública de reservas para pacientes</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="slug">Slug de reserva</Label>
-            <Input
-              id="slug"
-              value={settings.bookingSlug}
-              onChange={(e) => setSettings({ ...settings, bookingSlug: e.target.value })}
-            />
-            <p className="text-xs text-muted-foreground">
-              Tu página de reservas: <span className="font-mono">{bookingUrl}</span>
-            </p>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Session settings */}
       <Card>
@@ -202,8 +177,8 @@ export default function SettingsPage() {
       {/* Reminders */}
       <Card>
         <CardHeader>
-          <CardTitle>Recordatorios de WhatsApp</CardTitle>
-          <CardDescription>Configura los recordatorios automáticos enviados a los pacientes por WhatsApp</CardDescription>
+          <CardTitle>Recordatorios por SMS</CardTitle>
+          <CardDescription>Configura los recordatorios automáticos enviados a los pacientes por SMS</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">

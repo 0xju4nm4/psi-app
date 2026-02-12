@@ -1,6 +1,11 @@
 import type { NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 
+const ALLOWED_EMAILS = [
+  "juan.villarraza@gmail.com",
+  "clarischmidhuber@gmail.com",
+];
+
 export default {
   providers: [
     Google({
@@ -20,6 +25,9 @@ export default {
     strategy: "jwt",
   },
   callbacks: {
+    async signIn({ profile }) {
+      return ALLOWED_EMAILS.includes(profile?.email ?? "");
+    },
     async jwt({ token, account }) {
       if (account) {
         token.accessToken = account.access_token;

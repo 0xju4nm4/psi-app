@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { sendWhatsAppReminder } from "@/lib/twilio";
+import { sendSmsReminder } from "@/lib/twilio";
 import { format } from "date-fns";
 
 export async function processReminders(): Promise<{ sent24h: number; sent1h: number }> {
@@ -38,7 +38,7 @@ export async function processReminders(): Promise<{ sent24h: number; sent1h: num
     // 24h reminder (send when 1-25 hours out and not yet sent)
     if (settings?.reminder24h && !session.reminder24hSent && hoursUntil <= 25 && hoursUntil > 1.5) {
       try {
-        await sendWhatsAppReminder(
+        await sendSmsReminder(
           phone,
           name,
           sessionTimeStr,
@@ -58,7 +58,7 @@ export async function processReminders(): Promise<{ sent24h: number; sent1h: num
     // 1h reminder (send when 0-1.5 hours out and not yet sent)
     if (settings?.reminder1h && !session.reminder1hSent && hoursUntil <= 1.5 && hoursUntil > 0) {
       try {
-        await sendWhatsAppReminder(
+        await sendSmsReminder(
           phone,
           name,
           sessionTimeStr,

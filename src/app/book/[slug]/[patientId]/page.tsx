@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
@@ -16,38 +15,56 @@ interface TimeSlot {
   display: string;
 }
 
-export default function BookingPage() {
+interface PatientInfo {
+  id: string;
+  name: string;
+  phone: string;
+  email: string | null;
+}
+
+export default function PatientBookingPage() {
   const params = useParams();
   const slug = params.slug as string;
+  const patientId = params.patientId as string;
 
-  const [validating, setValidating] = useState(true);
+  const [patient, setPatient] = useState<PatientInfo | null>(null);
+  const [pageError, setPageError] = useState("");
+  const [loading, setLoading] = useState(true);
   const [slugValid, setSlugValid] = useState(false);
-  const [practitionerName, setPractitionerName] = useState("");
 
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [slots, setSlots] = useState<TimeSlot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
+  const [practitionerName, setPractitionerName] = useState("");
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [booking, setBooking] = useState(false);
   const [booked, setBooked] = useState(false);
   const [error, setError] = useState("");
 
-  // Validate slug on mount
+  // Validate slug + fetch patient in parallel on mount
   useEffect(() => {
     const today = format(new Date(), "yyyy-MM-dd");
-    fetch(`/api/calendar/availability?slug=${slug}&date=${today}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error && data.error === "Practitioner not found") {
-          setSlugValid(false);
-        } else {
-          setSlugValid(true);
+
+    Promise.all([
+      fetch(`/api/calendar/availability?slug=${slug}&date=${today}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error && data.error === "Practitioner not found") {
+            throw new Error("Profesional no encontrado");
+          }
           if (data.practitionerName) setPractitionerName(data.practitionerName);
-        }
-      })
-      .catch(() => setSlugValid(false))
-      .finally(() => setValidating(false));
-  }, [slug]);
+          setSlugValid(true);
+        }),
+      fetch(`/api/patients/${patientId}/public`)
+        .then((res) => {
+          if (!res.ok) throw new Error("Paciente no encontrado");
+          return res.json();
+        })
+        .then((data) => setPatient(data)),
+    ])
+      .catch((err) => setPageError(err.message || "Enlace inválido"))
+      .finally(() => setLoading(false));
+  }, [slug, patientId]);
 
   // Fetch available slots when date changes
   useEffect(() => {
@@ -65,21 +82,19 @@ export default function BookingPage() {
           setSlots([]);
         } else {
           setSlots(data.slots);
-          if (data.practitionerName) setPractitionerName(data.practitionerName);
+          setPractitionerName(data.practitionerName || "");
         }
       })
       .catch(() => setError("Error al cargar horarios disponibles"))
       .finally(() => setLoadingSlots(false));
   }, [date, slug, slugValid]);
 
-  async function handleBook(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (!selectedSlot || !date) return;
+  async function handleBook() {
+    if (!selectedSlot || !date || !patient) return;
 
     setBooking(true);
     setError("");
 
-    const formData = new FormData(e.currentTarget);
     const startDate = new Date(selectedSlot.start);
 
     const res = await fetch("/api/booking", {
@@ -87,9 +102,9 @@ export default function BookingPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         slug,
-        name: formData.get("name"),
-        phone: formData.get("phone"),
-        email: formData.get("email"),
+        name: patient.name,
+        phone: patient.phone,
+        email: patient.email || "",
         date: format(date, "yyyy-MM-dd"),
         time: format(startDate, "HH:mm"),
       }),
@@ -104,7 +119,7 @@ export default function BookingPage() {
     setBooking(false);
   }
 
-  if (validating) {
+  if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-muted/50 p-4">
         <p className="text-muted-foreground">Cargando...</p>
@@ -112,14 +127,14 @@ export default function BookingPage() {
     );
   }
 
-  if (!slugValid) {
+  if (pageError || !patient || !slugValid) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-muted/50 p-4">
         <Card className="w-full max-w-md text-center">
           <CardHeader>
             <CardTitle className="text-red-600">Enlace inválido</CardTitle>
             <CardDescription>
-              No se encontró el profesional. Verifica el enlace e intenta de nuevo.
+              {pageError || "No se pudo cargar la información. Verifica el enlace con tu terapeuta."}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -134,7 +149,7 @@ export default function BookingPage() {
           <CardHeader>
             <CardTitle className="text-green-600">¡Sesión reservada!</CardTitle>
             <CardDescription>
-              Tu sesión ha sido confirmada para{" "}
+              {patient.name}, tu sesión ha sido confirmada para{" "}
               {date && format(date, "EEEE, d 'de' MMMM", { locale: es })} a las {selectedSlot?.display.split(" - ")[0]}.
               Recibirás un recordatorio por SMS antes de tu sesión.
             </CardDescription>
@@ -151,7 +166,9 @@ export default function BookingPage() {
           <CardTitle>
             {practitionerName ? `Reservar sesión con ${practitionerName}` : "Reservar una sesión"}
           </CardTitle>
-          <CardDescription>Selecciona una fecha y hora para tu cita</CardDescription>
+          <CardDescription>
+            Hola {patient.name}, selecciona una fecha y hora para tu cita
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-6 md:grid-cols-2">
@@ -167,7 +184,7 @@ export default function BookingPage() {
               />
             </div>
 
-            {/* Time slots + form */}
+            {/* Time slots */}
             <div className="space-y-4">
               {date && (
                 <>
@@ -196,23 +213,15 @@ export default function BookingPage() {
               )}
 
               {selectedSlot && (
-                <form onSubmit={handleBook} className="space-y-3 border-t pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Tu nombre *</Label>
-                    <Input id="name" name="name" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Número de teléfono *</Label>
-                    <Input id="phone" name="phone" placeholder="+5511999999999" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Correo electrónico (opcional)</Label>
-                    <Input id="email" name="email" type="email" />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={booking}>
+                <div className="border-t pt-4">
+                  <Button
+                    className="w-full"
+                    disabled={booking}
+                    onClick={handleBook}
+                  >
                     {booking ? "Reservando..." : `Reservar ${selectedSlot.display}`}
                   </Button>
-                </form>
+                </div>
               )}
 
               {error && <p className="text-sm text-red-500">{error}</p>}

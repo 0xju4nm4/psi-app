@@ -5,7 +5,7 @@ const client = twilio(
   process.env.TWILIO_AUTH_TOKEN
 );
 
-export async function sendWhatsAppReminder(
+export async function sendSmsReminder(
   to: string,
   patientName: string,
   sessionTime: string,
@@ -13,8 +13,8 @@ export async function sendWhatsAppReminder(
   paymentReminder?: string | null
 ): Promise<void> {
   const body = [
-    `Ola ${patientName}!`,
-    `Lembrete: voce tem uma sessao agendada para ${sessionTime}.`,
+    `¡Hola ${patientName}!`,
+    `Recordatorio: tienes una sesión programada para ${sessionTime}.`,
     customMessage,
     paymentReminder,
   ]
@@ -22,8 +22,8 @@ export async function sendWhatsAppReminder(
     .join("\n\n");
 
   await client.messages.create({
-    from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`,
-    to: `whatsapp:${to}`,
+    from: process.env.TWILIO_PHONE_NUMBER!,
+    to,
     body,
   });
 }

@@ -30,6 +30,8 @@ import {
   ChevronUp,
   Loader2,
   Square,
+  Link,
+  Check,
 } from "lucide-react";
 
 interface TherapySession {
@@ -79,6 +81,8 @@ export default function PatientDetailPage() {
   const [recording, setRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [expandedNotes, setExpandedNotes] = useState<Set<string>>(new Set());
+  const [bookingSlug, setBookingSlug] = useState<string | null>(null);
+  const [linkCopied, setLinkCopied] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -90,6 +94,15 @@ export default function PatientDetailPage() {
       .then(setPatient)
       .finally(() => setLoading(false));
   }, [params.id]);
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.bookingSlug) setBookingSlug(data.bookingSlug);
+      })
+      .catch(() => {});
+  }, []);
 
   function fetchNotes() {
     setNotesLoading(true);
@@ -142,6 +155,16 @@ export default function PatientDetailPage() {
     } else {
       toast.error("Error al eliminar paciente");
     }
+  }
+
+  function copyBookingLink() {
+    if (!bookingSlug || !patient) return;
+    const link = `${window.location.origin}/book/${bookingSlug}/${patient.id}`;
+    navigator.clipboard.writeText(link).then(() => {
+      setLinkCopied(true);
+      toast.success("Enlace copiado al portapapeles");
+      setTimeout(() => setLinkCopied(false), 2000);
+    });
   }
 
   async function handleSaveNote(e: React.FormEvent<HTMLFormElement>) {
@@ -292,6 +315,16 @@ export default function PatientDetailPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">{patient.name}</h1>
         <div className="flex gap-2">
+          {bookingSlug && (
+            <Button variant="outline" onClick={copyBookingLink}>
+              {linkCopied ? (
+                <Check className="mr-2 size-4 text-green-600" />
+              ) : (
+                <Link className="mr-2 size-4" />
+              )}
+              {linkCopied ? "¡Copiado!" : "Enlace de reserva"}
+            </Button>
+          )}
           <Button variant="outline" onClick={() => setEditing(!editing)}>
             {editing ? "Cancelar" : "Editar"}
           </Button>
@@ -319,7 +352,7 @@ export default function PatientDetailPage() {
                     <Input id="name" name="name" defaultValue={patient.name} required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Número de WhatsApp</Label>
+                    <Label htmlFor="phone">Número de teléfono</Label>
                     <Input id="phone" name="phone" defaultValue={patient.phone} required />
                   </div>
                   <div className="space-y-2">

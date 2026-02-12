@@ -19,7 +19,7 @@ export const sessionSchema = z.object({
 export const bookingSchema = z.object({
   slug: z.string().min(1),
   name: z.string().min(1, "El nombre es requerido"),
-  phone: z.string().min(10, "El número de WhatsApp es requerido"),
+  phone: z.string().min(10, "El número de teléfono es requerido"),
   email: z.string().email().optional().or(z.literal("")),
   date: z.string().min(1, "La fecha es requerida"),
   time: z.string().min(1, "El horario es requerido"),
