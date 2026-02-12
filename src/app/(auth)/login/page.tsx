@@ -9,7 +9,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-muted/50">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">PsychPractice</CardTitle>
+          <CardTitle className="text-2xl">PSI APP</CardTitle>
           <CardDescription>
             Inicia sesión para gestionar tu calendario, pacientes y citas
           </CardDescription>
