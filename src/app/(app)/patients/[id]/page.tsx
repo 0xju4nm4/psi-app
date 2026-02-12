@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { SESSION_STATUS_LABELS } from "@/lib/constants";
 import {
+  ArrowLeft,
   FileText,
   Mic,
   Plus,
@@ -33,6 +34,7 @@ import {
   Link,
   Check,
 } from "lucide-react";
+import NextLink from "next/link";
 
 interface TherapySession {
   id: string;
@@ -311,12 +313,20 @@ export default function PatientDetailPage() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6">
+      <NextLink
+        href="/patients"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <ArrowLeft className="size-4" />
+        Pacientes
+      </NextLink>
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-semibold">{patient.name}</h1>
         <div className="flex gap-2">
           {bookingSlug && (
-            <Button variant="outline" onClick={copyBookingLink}>
+            <Button variant="outline" size="sm" onClick={copyBookingLink}>
               {linkCopied ? (
                 <Check className="mr-2 size-4 text-green-600" />
               ) : (
@@ -325,10 +335,10 @@ export default function PatientDetailPage() {
               {linkCopied ? "¡Copiado!" : "Enlace de reserva"}
             </Button>
           )}
-          <Button variant="outline" onClick={() => setEditing(!editing)}>
+          <Button variant="outline" size="sm" onClick={() => setEditing(!editing)}>
             {editing ? "Cancelar" : "Editar"}
           </Button>
-          <Button variant="destructive" onClick={handleDelete}>
+          <Button variant="destructive" size="sm" onClick={handleDelete}>
             Eliminar
           </Button>
         </div>

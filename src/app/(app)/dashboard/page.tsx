@@ -5,10 +5,10 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { format, startOfDay, endOfDay, startOfWeek, addDays } from "date-fns";
 import { es } from "date-fns/locale";
 import { SESSION_STATUS_LABELS } from "@/lib/constants";
+import { CalendarDays, UserPlus, Link as LinkIcon, Clock } from "lucide-react";
 
 interface Patient {
   id: string;
@@ -64,9 +64,6 @@ export default function DashboardPage() {
   const upcomingToday = todaySessions.filter(
     (s) => s.status !== "CANCELLED" && new Date(s.startTime) >= new Date()
   );
-  const completedToday = todaySessions.filter(
-    (s) => s.status === "COMPLETED" || new Date(s.endTime) < new Date()
-  );
 
   if (loading) return <p className="text-muted-foreground">Cargando panel...</p>;
 
@@ -74,79 +71,92 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Panel</h1>
 
-      {/* Quick stats */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Sesiones de hoy</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{todaySessions.filter((s) => s.status !== "CANCELLED").length}</p>
+      {/* Quick stats — always 3 cols, compact */}
+      <div className="grid grid-cols-3 gap-3">
+        <Card className="p-0">
+          <CardContent className="px-3 py-3 sm:px-4 sm:py-4">
+            <p className="text-xs text-muted-foreground sm:text-sm">Hoy</p>
+            <p className="text-2xl font-bold sm:text-3xl">
+              {todaySessions.filter((s) => s.status !== "CANCELLED").length}
+            </p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Esta semana</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{weekSessions.filter((s) => s.status !== "CANCELLED").length}</p>
+        <Card className="p-0">
+          <CardContent className="px-3 py-3 sm:px-4 sm:py-4">
+            <p className="text-xs text-muted-foreground sm:text-sm">Semana</p>
+            <p className="text-2xl font-bold sm:text-3xl">
+              {weekSessions.filter((s) => s.status !== "CANCELLED").length}
+            </p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Próximas hoy</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{upcomingToday.length}</p>
+        <Card className="p-0">
+          <CardContent className="px-3 py-3 sm:px-4 sm:py-4">
+            <p className="text-xs text-muted-foreground sm:text-sm">Próximas</p>
+            <p className="text-2xl font-bold sm:text-3xl">{upcomingToday.length}</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Quick actions */}
       <div className="flex flex-wrap gap-2">
-        <Link href="/patients/new"><Button variant="outline">Agregar paciente</Button></Link>
-        <Link href="/calendar"><Button variant="outline">Ver calendario</Button></Link>
+        <Link href="/patients/new">
+          <Button variant="outline" size="sm">
+            <UserPlus className="mr-2 size-4" />
+            Agregar paciente
+          </Button>
+        </Link>
+        <Link href="/calendar">
+          <Button variant="outline" size="sm">
+            <CalendarDays className="mr-2 size-4" />
+            Ver calendario
+          </Button>
+        </Link>
         {settings?.bookingSlug && (
           <Button
             variant="outline"
+            size="sm"
             onClick={() => {
               const url = `${window.location.origin}/book/${settings.bookingSlug}`;
               navigator.clipboard.writeText(url);
             }}
           >
+            <LinkIcon className="mr-2 size-4" />
             Copiar enlace de reserva
           </Button>
         )}
       </div>
 
-      <Separator />
-
-      {/* Today's schedule */}
+      {/* Today's agenda */}
       <Card>
-        <CardHeader>
-          <CardTitle>Agenda de hoy - {format(new Date(), "EEEE, d 'de' MMMM", { locale: es })}</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base sm:text-lg">
+            Agenda — {format(new Date(), "EEEE d", { locale: es })}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {todaySessions.length === 0 ? (
-            <p className="text-muted-foreground">Sin sesiones programadas para hoy</p>
+            <p className="text-sm text-muted-foreground">Sin sesiones hoy</p>
           ) : (
-            <div className="space-y-3">
+            <div className="divide-y">
               {todaySessions
                 .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
                 .map((s) => (
-                  <div
-                    key={s.id}
-                    className="flex items-center justify-between rounded-md border p-3"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="text-sm font-mono">
-                        {format(new Date(s.startTime), "HH:mm")} - {format(new Date(s.endTime), "HH:mm")}
-                      </div>
-                      <div>
-                        <p className="font-medium">{s.patient?.name || s.guestName || "Sesión"}</p>
-                      </div>
+                  <div key={s.id} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
+                    <div className="flex shrink-0 items-center gap-1.5 pt-0.5 text-sm text-muted-foreground">
+                      <Clock className="size-3.5" />
+                      <span className="font-mono text-xs">
+                        {format(new Date(s.startTime), "HH:mm")}
+                      </span>
                     </div>
-                    <Badge className={statusColors[s.status] ?? ""} variant="secondary">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">
+                        {s.patient?.name || s.guestName || "Sesión"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {format(new Date(s.startTime), "HH:mm")} – {format(new Date(s.endTime), "HH:mm")}
+                      </p>
+                    </div>
+                    <Badge className={`shrink-0 text-[10px] sm:text-xs ${statusColors[s.status] ?? ""}`} variant="secondary">
                       {SESSION_STATUS_LABELS[s.status] ?? s.status}
                     </Badge>
                   </div>
@@ -156,13 +166,13 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Week overview */}
+      {/* Week overview — horizontal scroll on mobile */}
       <Card>
-        <CardHeader>
-          <CardTitle>Esta semana</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base sm:text-lg">Esta semana</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-7 gap-2">
+          <div className="flex gap-2 overflow-x-auto pb-1">
             {Array.from({ length: 7 }, (_, i) => {
               const day = addDays(startOfWeek(new Date(), { weekStartsOn: 1 }), i);
               const count = weekSessions.filter(
@@ -175,11 +185,17 @@ export default function DashboardPage() {
               return (
                 <div
                   key={i}
-                  className={`rounded-md border p-2 text-center ${isToday ? "border-primary bg-primary/5" : ""}`}
+                  className={`flex min-w-[3.5rem] flex-1 flex-col items-center rounded-lg border px-2 py-2.5 text-center transition-colors ${
+                    isToday ? "border-primary bg-primary/5 font-semibold" : ""
+                  }`}
                 >
-                  <div className="text-xs text-muted-foreground">{format(day, "EEE", { locale: es })}</div>
-                  <div className="text-lg font-semibold">{format(day, "d")}</div>
-                  <div className="text-xs text-muted-foreground">{count} sesión{count !== 1 ? "es" : ""}</div>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground sm:text-xs">
+                    {format(day, "EEE", { locale: es })}
+                  </span>
+                  <span className="text-lg font-semibold leading-tight sm:text-xl">{format(day, "d")}</span>
+                  <span className={`mt-0.5 text-[10px] sm:text-xs ${count > 0 ? "text-foreground" : "text-muted-foreground"}`}>
+                    {count}
+                  </span>
                 </div>
               );
             })}

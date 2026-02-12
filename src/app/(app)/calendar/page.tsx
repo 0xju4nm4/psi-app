@@ -120,15 +120,15 @@ export default function CalendarPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-semibold">Calendario</h1>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleSync} disabled={syncing}>
+          <Button variant="outline" size="sm" onClick={handleSync} disabled={syncing}>
             {syncing ? "Sincronizando..." : "Sincronizar Google Calendar"}
           </Button>
           <Dialog open={showNewSession} onOpenChange={setShowNewSession}>
             <DialogTrigger asChild>
-              <Button>Nueva sesión</Button>
+              <Button size="sm">Nueva sesión</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
@@ -174,18 +174,20 @@ export default function CalendarPage() {
       </div>
 
       {/* Week navigation */}
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="sm" onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))}>
-          Anterior
-        </Button>
-        <Button variant="outline" size="sm" onClick={() => setCurrentWeek(startOfWeek(new Date(), { weekStartsOn: 1 }))}>
-          Hoy
-        </Button>
-        <Button variant="outline" size="sm" onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))}>
-          Siguiente
-        </Button>
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex gap-1">
+          <Button variant="outline" size="sm" onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))}>
+            Anterior
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setCurrentWeek(startOfWeek(new Date(), { weekStartsOn: 1 }))}>
+            Hoy
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))}>
+            Siguiente
+          </Button>
+        </div>
         <span className="text-sm text-muted-foreground">
-          {format(currentWeek, "dd MMM", { locale: es })} - {format(addDays(currentWeek, 6), "dd MMM yyyy", { locale: es })}
+          {format(currentWeek, "dd MMM", { locale: es })} – {format(addDays(currentWeek, 6), "dd MMM yyyy", { locale: es })}
         </span>
       </div>
 

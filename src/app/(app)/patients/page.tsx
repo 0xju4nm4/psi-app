@@ -36,10 +36,10 @@ export default function PatientsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-semibold">Pacientes</h1>
         <Link href="/patients/new">
-          <Button>Agregar paciente</Button>
+          <Button size="sm">Agregar paciente</Button>
         </Link>
       </div>
 
@@ -57,18 +57,18 @@ export default function PatientsPage() {
           {search ? "No se encontraron pacientes con esa búsqueda." : "Sin pacientes aún. ¡Agrega tu primer paciente!"}
         </p>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {patients.map((patient) => (
             <Link key={patient.id} href={`/patients/${patient.id}`}>
-              <Card className="cursor-pointer transition-shadow hover:shadow-md">
-                <CardContent className="p-4">
-                  <h3 className="font-medium">{patient.name}</h3>
-                  <p className="text-sm text-muted-foreground">{patient.phone}</p>
+              <Card className="cursor-pointer p-0 transition-shadow hover:shadow-md">
+                <CardContent className="px-3 py-2.5">
+                  <h3 className="text-sm font-medium">{patient.name}</h3>
+                  <p className="text-xs text-muted-foreground">{patient.phone}</p>
                   {patient.email && (
-                    <p className="text-sm text-muted-foreground">{patient.email}</p>
+                    <p className="truncate text-xs text-muted-foreground">{patient.email}</p>
                   )}
                   {patient.sessions.length > 0 && (
-                    <Badge variant="secondary" className="mt-2">
+                    <Badge variant="secondary" className="mt-1.5 text-[10px]">
                       Próxima: {format(new Date(patient.sessions[0].startTime), "dd/MM HH:mm")}
                     </Badge>
                   )}
