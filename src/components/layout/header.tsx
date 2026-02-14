@@ -61,7 +61,7 @@ export function Header() {
             </Link>
           </div>
 
-          <nav className="flex w-[62.5%] shrink-0 items-center px-4">
+          <nav className="flex w-[71.5%] shrink-0 items-center px-4">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname.startsWith(item.href);
