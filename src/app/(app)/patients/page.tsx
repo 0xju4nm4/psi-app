@@ -42,7 +42,7 @@ export default function PatientsPage() {
           <h1 className="text-[28px] font-bold tracking-tight">Pacientes</h1>
           <p className="mt-1 text-[15px] text-muted-foreground">Gestiona tu lista de pacientes</p>
         </div>
-        <Link href="/patients/new">
+        <Link href="/patients/new" className="self-end sm:self-auto">
           <Button size="sm" className="rounded-xl">
             <UserPlus className="mr-2 size-4" />
             Agregar paciente

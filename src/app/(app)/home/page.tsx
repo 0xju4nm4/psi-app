@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { format, startOfDay, endOfDay, startOfWeek, addDays, addWeeks, subWeeks, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
 import { SESSION_STATUS_LABELS } from "@/lib/constants";
-import { CalendarDays, UserPlus, Clock, ChevronRight, ChevronLeft } from "lucide-react";
+import { Clock, ChevronRight, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Patient {
@@ -36,7 +36,7 @@ const statusColors: Record<string, string> = {
   NO_SHOW: "bg-amber-500/15 text-amber-700",
 };
 
-export default function DashboardPage() {
+export default function HomePage() {
   const [weekSessions, setWeekSessions] = useState<TherapySession[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);
@@ -86,58 +86,50 @@ export default function DashboardPage() {
     (s) => s.status !== "CANCELLED" && new Date(s.startTime) >= new Date()
   );
 
+  const stats = loading
+    ? null
+    : [
+        { label: "Hoy", value: todaySessions.filter((s) => s.status !== "CANCELLED").length },
+        { label: "Semana", value: weekSessions.filter((s) => s.status !== "CANCELLED").length },
+        { label: "Próximas", value: upcomingToday.length },
+      ];
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-[28px] font-bold tracking-tight">Bienvenidx</h1>
-        <p className="mt-1 text-[13px] text-muted-foreground uppercase">
+        <h1 className="text-[26px] font-bold tracking-tight">Bienvenidx</h1>
+        <p className="mt-0.5 text-[13px] text-muted-foreground uppercase">
           {format(new Date(), "EEEE d 'de' MMMM", { locale: es })}
         </p>
       </div>
 
-      {/* Stats — glass cards */}
-      <div className="grid grid-cols-3 gap-3">
-        {loading ? (
-          [1, 2, 3].map((i) => (
-            <div key={i} className="rounded-2xl bg-card p-4 border border-[#EFEFEF] min-h-[80px]">
-              <div className="h-3 w-16 animate-pulse rounded bg-muted" />
-              <div className="mt-2 h-8 w-12 animate-pulse rounded bg-muted" />
+      {stats ? (
+        <div className="flex w-full rounded-xl border border-[#EFEFEF] bg-card px-3 py-2.5">
+          {stats.map((stat, i) => (
+            <div
+              key={stat.label}
+              className={cn(
+                "flex flex-1 flex-col items-center justify-center gap-0.5",
+                i > 0 && "border-l border-[#EFEFEF]"
+              )}
+            >
+              <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                {stat.label}
+              </span>
+              <span className="text-[19px] font-bold tabular-nums leading-none">{stat.value}</span>
             </div>
-          ))
-        ) : (
-        [
-          { label: "Hoy", value: todaySessions.filter((s) => s.status !== "CANCELLED").length },
-          { label: "Semana", value: weekSessions.filter((s) => s.status !== "CANCELLED").length },
-          { label: "Próximas", value: upcomingToday.length },
-        ].map((stat) => (
-          <div
-            key={stat.label}
-            className="rounded-2xl bg-card p-4 border border-[#EFEFEF] min-h-[80px]"
-          >
-            <p className="text-[12px] font-medium uppercase tracking-wider text-muted-foreground">
-              {stat.label}
-            </p>
-            <p className="mt-1 text-2xl font-bold sm:text-3xl">{stat.value}</p>
-          </div>
-        ))
-        )}
-      </div>
-
-      {/* Quick actions */}
-      <div className="flex flex-wrap gap-2">
-        <Link href="/patients/new">
-          <Button size="sm" className="rounded-xl">
-            <UserPlus className="mr-2 size-4" />
-            Agregar paciente
-          </Button>
-        </Link>
-        <Link href="/calendar">
-          <Button variant="outline" size="sm" className="rounded-xl">
-            <CalendarDays className="mr-2 size-4" />
-            Ver calendario
-          </Button>
-        </Link>
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex w-full rounded-xl border border-[#EFEFEF] bg-card px-3 py-2.5">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="flex flex-1 flex-col items-center">
+              <div className="h-3 w-12 animate-pulse rounded bg-muted" />
+              <div className="mt-2 h-6 w-8 animate-pulse rounded bg-muted" />
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Day selector + agenda */}
       <section className="w-full">

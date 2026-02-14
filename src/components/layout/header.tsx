@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  LayoutDashboard,
+  Home,
   Calendar,
   Users,
   Settings,
@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 
 const navItems = [
-  { href: "/dashboard", label: "Panel", icon: LayoutDashboard },
+  { href: "/home", label: "Home", icon: Home },
   { href: "/calendar", label: "Calendario", icon: Calendar },
   { href: "/patients", label: "Pacientes", icon: Users },
   { href: "/settings", label: "Ajustes", icon: Settings },
@@ -46,7 +46,7 @@ export function Header() {
         <div className="flex h-14 w-full items-center">
           <div className="flex flex-1 items-center justify-start pl-4 sm:pl-6">
             <Link
-              href="/dashboard"
+              href="/home"
               className="flex items-center"
               aria-label="PsiApp"
             >

@@ -5,8 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, ChevronDown } from "lucide-react";
 
 interface WorkingDay {
   start: string;
@@ -123,11 +128,21 @@ export default function SettingsPage() {
       <div className="grid gap-6 md:grid-cols-[1fr_1fr]">
         {/* Left: Sesiones + Horario laboral */}
         <div className="flex flex-col gap-6">
-          <section className="space-y-2">
-            <h2 className="text-[13px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Sesiones
-            </h2>
-            <div className="overflow-hidden rounded-xl bg-card border border-[#EFEFEF]">
+          <Collapsible defaultOpen>
+            <div className="overflow-hidden rounded-xl border border-[#EFEFEF] bg-card">
+            <CollapsibleTrigger asChild>
+              <button
+                type="button"
+                className="group flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-muted/30"
+              >
+                <span className="text-[13px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Sesiones
+                </span>
+                <ChevronDown className="size-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+            <div className="border-t border-[#EFEFEF]">
               <div className="divide-y divide-[#EFEFEF]">
                 <SettingRow label="Duración (min)">
                   <Input
@@ -155,13 +170,25 @@ export default function SettingsPage() {
                 </SettingRow>
               </div>
             </div>
-          </section>
+            </CollapsibleContent>
+            </div>
+          </Collapsible>
 
-          <section className="space-y-2">
-            <h2 className="text-[13px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Horario laboral
-            </h2>
-            <div className="overflow-hidden rounded-xl bg-card border border-[#EFEFEF]">
+          <Collapsible defaultOpen>
+            <div className="overflow-hidden rounded-xl border border-[#EFEFEF] bg-card">
+            <CollapsibleTrigger asChild>
+              <button
+                type="button"
+                className="group flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-muted/30"
+              >
+                <span className="text-[13px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Horario laboral
+                </span>
+                <ChevronDown className="size-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+            <div className="border-t border-[#EFEFEF]">
               <div className="divide-y divide-[#EFEFEF]">
                 {DAYS.map((day) => (
                   <div key={day} className="flex items-center gap-3 px-4 py-2">
@@ -195,15 +222,27 @@ export default function SettingsPage() {
                 ))}
               </div>
             </div>
-          </section>
+            </CollapsibleContent>
+            </div>
+          </Collapsible>
         </div>
 
         {/* Right: Recordatorios */}
-        <section className="space-y-2">
-          <h2 className="text-[13px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Recordatorios
-          </h2>
-          <div className="overflow-hidden rounded-xl bg-card border border-[#EFEFEF]">
+        <Collapsible defaultOpen>
+          <div className="overflow-hidden rounded-xl border border-[#EFEFEF] bg-card">
+          <CollapsibleTrigger asChild>
+            <button
+              type="button"
+              className="group flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-muted/30"
+            >
+              <span className="text-[13px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Recordatorios
+              </span>
+              <ChevronDown className="size-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+            </button>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+          <div className="border-t border-[#EFEFEF]">
             <label className="flex cursor-pointer items-center gap-3 px-4 py-3">
               <input
                 type="checkbox"
@@ -240,7 +279,9 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
-        </section>
+          </CollapsibleContent>
+          </div>
+        </Collapsible>
       </div>
 
       <Button

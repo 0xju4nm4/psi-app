@@ -19,7 +19,7 @@ export default async function AppLayout({
       <div className="flex h-screen flex-col overflow-hidden">
         <Header />
         <main className="min-h-0 flex-1 overflow-y-auto">
-            <div className="mx-auto w-full px-4 py-5 pb-28 sm:px-6 md:w-[62.5%] md:pb-8 lg:px-8">
+            <div className="mx-auto w-full max-w-full min-w-0 px-4 py-5 pb-28 sm:px-6 md:w-[62.5%] md:pb-8 lg:px-8">
             {children}
           </div>
         </main>
