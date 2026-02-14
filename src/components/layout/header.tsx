@@ -61,7 +61,7 @@ export function Header() {
             </Link>
           </div>
 
-          <nav className="flex w-[62.5%] shrink-0 items-center justify-start gap-1 px-4">
+          <nav className="flex w-[62.5%] shrink-0 items-center px-4">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname.startsWith(item.href);
@@ -70,7 +70,7 @@ export function Header() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "inline-flex items-center gap-2 rounded-lg px-3 py-2 text-[15px] font-medium transition-colors",
+                    "flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-[15px] font-medium transition-colors",
                     isActive
                       ? "text-primary"
                       : "text-muted-foreground hover:text-foreground"
@@ -114,7 +114,7 @@ export function Header() {
 
       {/* Mobile bottom tab bar */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#EFEFEF] bg-background md:hidden py-2">
-        <div className="flex h-[52px] items-center justify-around px-2">
+        <div className="flex h-[52px] w-full items-center px-2">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname.startsWith(item.href);
@@ -123,7 +123,7 @@ export function Header() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex min-w-[64px] flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-medium transition-colors",
+                  "flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-medium transition-colors",
                   isActive ? "text-primary" : "text-muted-foreground"
                 )}
               >
