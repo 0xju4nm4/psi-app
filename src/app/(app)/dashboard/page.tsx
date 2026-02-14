@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { format, startOfDay, endOfDay, startOfWeek, addDays } from "date-fns";
+import { format, startOfDay, endOfDay, startOfWeek, addDays, addWeeks, subWeeks, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
 import { SESSION_STATUS_LABELS } from "@/lib/constants";
-import { CalendarDays, UserPlus, Link as LinkIcon, Clock } from "lucide-react";
+import { CalendarDays, UserPlus, Clock, ChevronRight, ChevronLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface Patient {
   id: string;
@@ -29,179 +29,238 @@ interface Settings {
 }
 
 const statusColors: Record<string, string> = {
-  SCHEDULED: "bg-blue-100 text-blue-800",
-  CONFIRMED: "bg-green-100 text-green-800",
-  COMPLETED: "bg-gray-100 text-gray-800",
-  CANCELLED: "bg-red-100 text-red-800",
-  NO_SHOW: "bg-yellow-100 text-yellow-800",
+  SCHEDULED: "bg-blue-500/15 text-blue-700",
+  CONFIRMED: "bg-green-500/15 text-green-700",
+  COMPLETED: "bg-gray-400/20 text-gray-600",
+  CANCELLED: "bg-red-500/15 text-red-600",
+  NO_SHOW: "bg-amber-500/15 text-amber-700",
 };
 
 export default function DashboardPage() {
-  const [todaySessions, setTodaySessions] = useState<TherapySession[]>([]);
   const [weekSessions, setWeekSessions] = useState<TherapySession[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentWeekStart, setCurrentWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
+
+  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i));
+  const today = new Date();
+
+  const [todaySessions, setTodaySessions] = useState<TherapySession[]>([]);
 
   useEffect(() => {
-    const today = new Date();
+    const weekStart = currentWeekStart.toISOString();
+    const weekEnd = addDays(currentWeekStart, 7).toISOString();
     const todayStart = startOfDay(today).toISOString();
     const todayEnd = endOfDay(today).toISOString();
-    const weekStart = startOfWeek(today, { weekStartsOn: 1 }).toISOString();
-    const weekEnd = addDays(startOfWeek(today, { weekStartsOn: 1 }), 7).toISOString();
 
     Promise.all([
-      fetch(`/api/sessions?from=${todayStart}&to=${todayEnd}`).then((r) => r.json()),
       fetch(`/api/sessions?from=${weekStart}&to=${weekEnd}`).then((r) => r.json()),
+      fetch(`/api/sessions?from=${todayStart}&to=${todayEnd}`).then((r) => r.json()),
       fetch("/api/settings").then((r) => r.json()),
-    ]).then(([today, week, settings]) => {
-      setTodaySessions(today);
+    ]).then(([week, todayData, settings]) => {
       setWeekSessions(week);
+      setTodaySessions(todayData);
       setSettings(settings);
       setLoading(false);
     });
-  }, []);
+  }, [currentWeekStart]);
+
+  useEffect(() => {
+    const weekEnd = addDays(currentWeekStart, 6);
+    const todayInWeek = today >= currentWeekStart && today <= weekEnd;
+    setSelectedDate((prev) => {
+      if (prev >= currentWeekStart && prev <= weekEnd) return prev;
+      return todayInWeek ? today : currentWeekStart;
+    });
+  }, [currentWeekStart]);
+
+  const selectedDaySessions = weekSessions
+    .filter(
+      (s) =>
+        format(new Date(s.startTime), "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd")
+    )
+    .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
 
   const upcomingToday = todaySessions.filter(
     (s) => s.status !== "CANCELLED" && new Date(s.startTime) >= new Date()
   );
 
-  if (loading) return <p className="text-muted-foreground">Cargando panel...</p>;
-
   return (
-    <div className="space-y-6">
-      <h1 className="text-[34px] font-bold tracking-tight">Panel</h1>
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-[28px] font-bold tracking-tight">Bienvenidx</h1>
+        <p className="mt-1 text-[13px] text-muted-foreground uppercase">
+          {format(new Date(), "EEEE d 'de' MMMM", { locale: es })}
+        </p>
+      </div>
 
-      {/* Quick stats — always 3 cols, compact */}
+      {/* Stats — glass cards */}
       <div className="grid grid-cols-3 gap-3">
-        <Card className="gap-0 border-0 p-0 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.08)]">
-          <CardContent className="px-3 py-3 sm:px-4 sm:py-4">
-            <p className="text-xs text-muted-foreground sm:text-sm">Hoy</p>
-            <p className="text-2xl font-bold sm:text-3xl">
-              {todaySessions.filter((s) => s.status !== "CANCELLED").length}
+        {loading ? (
+          [1, 2, 3].map((i) => (
+            <div key={i} className="rounded-2xl bg-card p-4 border border-[#EFEFEF] min-h-[80px]">
+              <div className="h-3 w-16 animate-pulse rounded bg-muted" />
+              <div className="mt-2 h-8 w-12 animate-pulse rounded bg-muted" />
+            </div>
+          ))
+        ) : (
+        [
+          { label: "Hoy", value: todaySessions.filter((s) => s.status !== "CANCELLED").length },
+          { label: "Semana", value: weekSessions.filter((s) => s.status !== "CANCELLED").length },
+          { label: "Próximas", value: upcomingToday.length },
+        ].map((stat) => (
+          <div
+            key={stat.label}
+            className="rounded-2xl bg-card p-4 border border-[#EFEFEF] min-h-[80px]"
+          >
+            <p className="text-[12px] font-medium uppercase tracking-wider text-muted-foreground">
+              {stat.label}
             </p>
-          </CardContent>
-        </Card>
-        <Card className="gap-0 border-0 p-0 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.08)]">
-          <CardContent className="px-3 py-3 sm:px-4 sm:py-4">
-            <p className="text-xs text-muted-foreground sm:text-sm">Semana</p>
-            <p className="text-2xl font-bold sm:text-3xl">
-              {weekSessions.filter((s) => s.status !== "CANCELLED").length}
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="gap-0 border-0 p-0 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.08)]">
-          <CardContent className="px-3 py-3 sm:px-4 sm:py-4">
-            <p className="text-xs text-muted-foreground sm:text-sm">Próximas</p>
-            <p className="text-2xl font-bold sm:text-3xl">{upcomingToday.length}</p>
-          </CardContent>
-        </Card>
+            <p className="mt-1 text-2xl font-bold sm:text-3xl">{stat.value}</p>
+          </div>
+        ))
+        )}
       </div>
 
       {/* Quick actions */}
       <div className="flex flex-wrap gap-2">
         <Link href="/patients/new">
-          <Button variant="outline" size="sm">
+          <Button size="sm" className="rounded-xl">
             <UserPlus className="mr-2 size-4" />
             Agregar paciente
           </Button>
         </Link>
         <Link href="/calendar">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="rounded-xl">
             <CalendarDays className="mr-2 size-4" />
             Ver calendario
           </Button>
         </Link>
-        {settings?.bookingSlug && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              const url = `${window.location.origin}/book/${settings.bookingSlug}`;
-              navigator.clipboard.writeText(url);
-            }}
-          >
-            <LinkIcon className="mr-2 size-4" />
-            Copiar enlace de reserva
-          </Button>
-        )}
       </div>
 
-      {/* Today's agenda */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base sm:text-lg">
-            Agenda — {format(new Date(), "EEEE d", { locale: es })}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {todaySessions.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Sin sesiones hoy</p>
-          ) : (
-            <div className="divide-y">
-              {todaySessions
-                .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
-                .map((s) => (
-                  <div key={s.id} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
-                    <div className="flex shrink-0 items-center gap-1.5 pt-0.5 text-sm text-muted-foreground">
-                      <Clock className="size-3.5" />
-                      <span className="font-mono text-xs">
-                        {format(new Date(s.startTime), "HH:mm")}
-                      </span>
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">
-                        {s.patient?.name || s.guestName || "Sesión"}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {format(new Date(s.startTime), "HH:mm")} – {format(new Date(s.endTime), "HH:mm")}
-                      </p>
-                    </div>
-                    <Badge className={`shrink-0 text-[10px] sm:text-xs ${statusColors[s.status] ?? ""}`} variant="secondary">
-                      {SESSION_STATUS_LABELS[s.status] ?? s.status}
-                    </Badge>
-                  </div>
-                ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* Day selector + agenda */}
+      <section className="w-full">
+        <div className="mb-4">
+          <h2 className="text-[13px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Agenda
+          </h2>
+        </div>
 
-      {/* Week overview — horizontal scroll on mobile */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base sm:text-lg">Esta semana</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {Array.from({ length: 7 }, (_, i) => {
-              const day = addDays(startOfWeek(new Date(), { weekStartsOn: 1 }), i);
+        {/* Week navigation + day strip */}
+        <div className="mb-4 flex w-full items-center gap-2 rounded-xl bg-card p-2 border border-[#EFEFEF]">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 shrink-0 rounded-lg"
+            onClick={() => setCurrentWeekStart(subWeeks(currentWeekStart, 1))}
+          >
+            <ChevronLeft className="size-4" />
+          </Button>
+          <div className="flex min-w-0 flex-1 gap-1">
+            {weekDays.map((day) => {
               const count = weekSessions.filter(
                 (s) =>
                   s.status !== "CANCELLED" &&
                   format(new Date(s.startTime), "yyyy-MM-dd") === format(day, "yyyy-MM-dd")
               ).length;
-              const isToday = format(day, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
+              const selected = isSameDay(day, selectedDate);
+              const isToday = isSameDay(day, today);
 
               return (
-                <div
-                  key={i}
-                  className={`flex min-w-[3.5rem] flex-1 flex-col items-center rounded-lg border px-2 py-2.5 text-center transition-colors ${
-                    isToday ? "border-primary bg-primary/5 font-semibold" : ""
-                  }`}
+                <button
+                  key={day.toISOString()}
+                  type="button"
+                  onClick={() => setSelectedDate(day)}
+                  className={cn(
+                    "flex min-w-0 flex-1 flex-col items-center rounded-lg px-2 py-2 text-center transition-colors",
+                    selected
+                      ? "bg-primary text-primary-foreground"
+                      : isToday
+                        ? "bg-primary/15 text-primary font-medium"
+                        : "hover:bg-muted/60"
+                  )}
                 >
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground sm:text-xs">
+                  <span className="text-[10px] font-medium uppercase">
                     {format(day, "EEE", { locale: es })}
                   </span>
-                  <span className="text-lg font-semibold leading-tight sm:text-xl">{format(day, "d")}</span>
-                  <span className={`mt-0.5 text-[10px] sm:text-xs ${count > 0 ? "text-foreground" : "text-muted-foreground"}`}>
-                    {count}
-                  </span>
-                </div>
+                  <span className="mt-0.5 text-base font-bold">{format(day, "d")}</span>
+                  {count > 0 && (
+                    <span
+                      className={cn(
+                        "mt-0.5 text-[10px] font-medium",
+                        selected ? "text-primary-foreground/80" : "text-muted-foreground"
+                      )}
+                    >
+                      {count}
+                    </span>
+                  )}
+                </button>
               );
             })}
           </div>
-        </CardContent>
-      </Card>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 shrink-0 rounded-lg"
+            onClick={() => setCurrentWeekStart(addWeeks(currentWeekStart, 1))}
+          >
+            <ChevronRight className="size-4" />
+          </Button>
+        </div>
+
+        {/* Agenda for selected day */}
+        <div className="overflow-hidden rounded-2xl bg-card border border-[#EFEFEF]">
+          <div className="border-b border-[#EFEFEF] px-4 py-2.5">
+            <p className="text-[15px] font-medium">
+              {format(selectedDate, "EEEE d 'de' MMMM", { locale: es })}
+            </p>
+          </div>
+          <div>
+          {loading ? (
+            <div className="flex min-h-[120px] items-center justify-center">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            </div>
+          ) : selectedDaySessions.length === 0 ? (
+            <div className="flex items-center justify-center py-12">
+              <p className="text-[15px] text-muted-foreground">Sin sesiones</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-[#EFEFEF]">
+              {selectedDaySessions.map((s) => (
+                <Link
+                  key={s.id}
+                  href="/calendar"
+                  className="flex items-center gap-4 px-4 py-3.5 transition-colors hover:bg-muted/50"
+                >
+                  <div className="flex shrink-0 items-center gap-2 text-muted-foreground">
+                    <Clock className="size-4" />
+                    <span className="font-mono text-[13px]">
+                      {format(new Date(s.startTime), "HH:mm")}
+                    </span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium">
+                      {s.patient?.name || s.guestName || "Sesión"}
+                    </p>
+                    <p className="text-[13px] text-muted-foreground">
+                      {format(new Date(s.startTime), "HH:mm")} – {format(new Date(s.endTime), "HH:mm")}
+                    </p>
+                  </div>
+                  <Badge
+                    className={cn("shrink-0 text-[11px] font-medium", statusColors[s.status] ?? "")}
+                    variant="secondary"
+                  >
+                    {SESSION_STATUS_LABELS[s.status] ?? s.status}
+                  </Badge>
+                  <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+                </Link>
+              ))}
+            </div>
+          )}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

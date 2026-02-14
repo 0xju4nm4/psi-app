@@ -16,10 +16,10 @@ export default async function AppLayout({
 
   return (
     <SessionProvider session={session}>
-      <div className="flex min-h-screen flex-col">
+      <div className="flex h-screen flex-col overflow-hidden">
         <Header />
-        <main className="flex-1">
-          <div className="mx-auto max-w-5xl px-4 py-6 pb-24 sm:px-6 md:pb-6 lg:px-8">
+        <main className="min-h-0 flex-1 overflow-y-auto">
+            <div className="mx-auto w-full px-4 py-5 pb-28 sm:px-6 md:w-[62.5%] md:pb-8 lg:px-8">
             {children}
           </div>
         </main>

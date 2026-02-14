@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -19,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import { SESSION_STATUS_LABELS } from "@/lib/constants";
 import {
   ArrowLeft,
@@ -35,6 +35,7 @@ import {
   Check,
 } from "lucide-react";
 import NextLink from "next/link";
+import { cn } from "@/lib/utils";
 
 interface TherapySession {
   id: string;
@@ -65,6 +66,14 @@ interface Patient {
   sessions: TherapySession[];
 }
 
+const statusColors: Record<string, string> = {
+  SCHEDULED: "bg-blue-500/15 text-blue-700",
+  CONFIRMED: "bg-green-500/15 text-green-700",
+  COMPLETED: "bg-gray-400/20 text-gray-600",
+  CANCELLED: "bg-red-500/15 text-red-600",
+  NO_SHOW: "bg-amber-500/15 text-amber-700",
+};
+
 export default function PatientDetailPage() {
   const router = useRouter();
   const params = useParams();
@@ -73,7 +82,6 @@ export default function PatientDetailPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Clinical notes state
   const [notes, setNotes] = useState<ClinicalNote[]>([]);
   const [notesLoading, setNotesLoading] = useState(false);
   const [noteDialogOpen, setNoteDialogOpen] = useState(false);
@@ -164,7 +172,7 @@ export default function PatientDetailPage() {
     const link = `${window.location.origin}/book/${bookingSlug}/${patient.id}`;
     navigator.clipboard.writeText(link).then(() => {
       setLinkCopied(true);
-      toast.success("Enlace copiado al portapapeles");
+      toast.success("Enlace copiado");
       setTimeout(() => setLinkCopied(false), 2000);
     });
   }
@@ -222,7 +230,7 @@ export default function PatientDetailPage() {
     const file = new File([blob], "recording.webm", { type: blob.type });
     const formData = new FormData();
     formData.append("audio", file);
-    formData.append("title", `Grabación de sesión — ${format(new Date(), "dd/MM/yyyy")}`);
+    formData.append("title", `Grabación — ${format(new Date(), "dd/MM/yyyy")}`);
 
     const res = await fetch(`/api/patients/${params.id}/notes/transcribe`, {
       method: "POST",
@@ -230,10 +238,10 @@ export default function PatientDetailPage() {
     });
 
     if (res.ok) {
-      toast.success("Audio transcrito exitosamente");
+      toast.success("Audio transcrito");
       fetchNotes();
     } else {
-      toast.error("Error al transcribir audio");
+      toast.error("Error al transcribir");
     }
 
     setTranscribing(false);
@@ -281,7 +289,6 @@ export default function PatientDetailPage() {
     setRecording(false);
   }, []);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
@@ -292,307 +299,274 @@ export default function PatientDetailPage() {
   function toggleExpanded(noteId: string) {
     setExpandedNotes((prev) => {
       const next = new Set(prev);
-      if (next.has(noteId)) {
-        next.delete(noteId);
-      } else {
-        next.add(noteId);
-      }
+      if (next.has(noteId)) next.delete(noteId);
+      else next.add(noteId);
       return next;
     });
   }
 
-  if (loading) return <p className="text-muted-foreground">Cargando...</p>;
+  if (loading)
+    return (
+      <div className="flex min-h-[200px] items-center justify-center">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    );
   if (!patient) return <p className="text-muted-foreground">Paciente no encontrado</p>;
-
-  const statusColors: Record<string, string> = {
-    SCHEDULED: "bg-blue-100 text-blue-800",
-    CONFIRMED: "bg-green-100 text-green-800",
-    COMPLETED: "bg-gray-100 text-gray-800",
-    CANCELLED: "bg-red-100 text-red-800",
-    NO_SHOW: "bg-yellow-100 text-yellow-800",
-  };
 
   return (
     <div className="space-y-6">
       <NextLink
         href="/patients"
-        className="inline-flex items-center gap-1.5 text-sm text-primary transition-colors hover:text-primary/80"
+        className="inline-flex items-center gap-2 text-[15px] font-medium text-primary transition-colors hover:text-primary/80"
       >
         <ArrowLeft className="size-4" />
         Pacientes
       </NextLink>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-[28px] font-bold tracking-tight">{patient.name}</h1>
-        <div className="flex gap-2">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xl font-bold text-primary">
+            {patient.name.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <h1 className="text-[28px] font-bold tracking-tight">{patient.name}</h1>
+            <p className="text-[15px] text-muted-foreground">{patient.phone}</p>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
           {bookingSlug && (
-            <Button variant="outline" size="sm" onClick={copyBookingLink}>
-              {linkCopied ? (
-                <Check className="mr-2 size-4 text-green-600" />
-              ) : (
-                <Link className="mr-2 size-4" />
-              )}
+            <Button variant="outline" size="sm" className="rounded-xl" onClick={copyBookingLink}>
+              {linkCopied ? <Check className="mr-2 size-4 text-green-600" /> : <Link className="mr-2 size-4" />}
               {linkCopied ? "¡Copiado!" : "Enlace de reserva"}
             </Button>
           )}
-          <Button variant="outline" size="sm" onClick={() => setEditing(!editing)}>
+          <Button variant="outline" size="sm" className="rounded-xl" onClick={() => setEditing(!editing)}>
             {editing ? "Cancelar" : "Editar"}
           </Button>
-          <Button variant="destructive" size="sm" onClick={handleDelete}>
+          <Button variant="destructive" size="sm" className="rounded-xl" onClick={handleDelete}>
             Eliminar
           </Button>
         </div>
       </div>
 
-      <Tabs defaultValue="info">
-        <TabsList>
-          <TabsTrigger value="info">Información</TabsTrigger>
-          <TabsTrigger value="clinical-history">Historia Clínica</TabsTrigger>
-          <TabsTrigger value="sessions">Sesiones</TabsTrigger>
+      <Tabs defaultValue="sessions" className="space-y-4">
+        <TabsList className="rounded-xl bg-muted p-1">
+          <TabsTrigger value="sessions" className="rounded-lg">Sesiones</TabsTrigger>
+          <TabsTrigger value="clinical-history" className="rounded-lg">Historia Clínica</TabsTrigger>
+          <TabsTrigger value="info" className="rounded-lg">Información</TabsTrigger>
         </TabsList>
 
-        {/* Info Tab */}
         <TabsContent value="info">
           {editing ? (
-            <Card>
-              <CardContent className="pt-6">
-                <form onSubmit={handleSave} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Nombre</Label>
-                    <Input id="name" name="name" defaultValue={patient.name} required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Número de teléfono</Label>
-                    <Input id="phone" name="phone" defaultValue={patient.phone} required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      defaultValue={patient.email ?? ""}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="notes">Notas</Label>
-                    <Textarea
-                      id="notes"
-                      name="notes"
-                      defaultValue={patient.notes ?? ""}
-                      rows={3}
-                    />
-                  </div>
-                  <Button type="submit" disabled={saving}>
-                    {saving ? "Guardando..." : "Guardar cambios"}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
+            <div className="overflow-hidden rounded-2xl bg-card border border-[#EFEFEF]">
+              <form onSubmit={handleSave} className="p-6 space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-[13px] font-medium">Nombre</Label>
+                  <Input id="name" name="name" defaultValue={patient.name} required className="rounded-xl" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="text-[13px] font-medium">Teléfono</Label>
+                  <Input id="phone" name="phone" defaultValue={patient.phone} required className="rounded-xl" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-[13px] font-medium">Email</Label>
+                  <Input id="email" name="email" type="email" defaultValue={patient.email ?? ""} className="rounded-xl" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="notes" className="text-[13px] font-medium">Notas</Label>
+                  <Textarea id="notes" name="notes" defaultValue={patient.notes ?? ""} rows={3} className="rounded-xl" />
+                </div>
+                <Button type="submit" disabled={saving} className="rounded-xl">
+                  {saving ? "Guardando..." : "Guardar"}
+                </Button>
+              </form>
+            </div>
           ) : (
-            <Card>
-              <CardContent className="space-y-2 pt-6">
-                <p>
-                  <span className="font-medium">Teléfono:</span> {patient.phone}
-                </p>
+            <div className="overflow-hidden rounded-2xl bg-card border border-[#EFEFEF]">
+              <div className="divide-y divide-[#EFEFEF]">
+                <div className="flex justify-between px-4 py-3.5">
+                  <span className="text-[13px] text-muted-foreground">Teléfono</span>
+                  <span className="font-medium">{patient.phone}</span>
+                </div>
                 {patient.email && (
-                  <p>
-                    <span className="font-medium">Correo:</span> {patient.email}
-                  </p>
+                  <div className="flex justify-between px-4 py-3.5">
+                    <span className="text-[13px] text-muted-foreground">Correo</span>
+                    <span className="font-medium">{patient.email}</span>
+                  </div>
                 )}
                 {patient.notes && (
-                  <p>
-                    <span className="font-medium">Notas:</span> {patient.notes}
-                  </p>
+                  <div className="px-4 py-3.5">
+                    <span className="text-[13px] text-muted-foreground">Notas</span>
+                    <p className="mt-1 text-[15px]">{patient.notes}</p>
+                  </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
         </TabsContent>
 
-        {/* Clinical History Tab */}
-        <TabsContent value="clinical-history">
-          <div className="space-y-4">
-            {/* Action bar */}
-            <div className="flex gap-2">
-              <Button
-                onClick={() => {
-                  setEditingNote(null);
-                  setNoteDialogOpen(true);
-                }}
-              >
-                <Plus className="mr-2 size-4" />
-                Nueva nota
+        <TabsContent value="clinical-history" className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              className="rounded-xl"
+              onClick={() => {
+                setEditingNote(null);
+                setNoteDialogOpen(true);
+              }}
+            >
+              <Plus className="mr-2 size-4" />
+              Nueva nota
+            </Button>
+            {transcribing ? (
+              <Button variant="outline" size="sm" disabled className="rounded-xl">
+                <Loader2 className="mr-2 size-4 animate-spin" />
+                Transcribiendo...
               </Button>
-              {transcribing ? (
-                <Button variant="outline" disabled>
-                  <Loader2 className="mr-2 size-4 animate-spin" />
-                  Transcribiendo...
-                </Button>
-              ) : recording ? (
-                <Button
-                  variant="destructive"
-                  onClick={stopRecording}
-                  className="animate-pulse"
-                >
-                  <Square className="mr-2 size-4" />
-                  Detener — {String(Math.floor(recordingTime / 60)).padStart(2, "0")}:
-                  {String(recordingTime % 60).padStart(2, "0")}
-                </Button>
-              ) : (
-                <Button variant="outline" onClick={startRecording}>
-                  <Mic className="mr-2 size-4" />
-                  Grabar
-                </Button>
-              )}
-            </div>
-
-            {/* Notes timeline */}
-            {notesLoading ? (
-              <p className="text-muted-foreground">Cargando notas...</p>
-            ) : notes.length === 0 ? (
-              <Card>
-                <CardContent className="py-8 text-center">
-                  <p className="text-muted-foreground">
-                    Sin notas clínicas aún. Crea una nota de texto o graba un audio.
-                  </p>
-                </CardContent>
-              </Card>
+            ) : recording ? (
+              <Button variant="destructive" size="sm" onClick={stopRecording} className="animate-pulse rounded-xl">
+                <Square className="mr-2 size-4" />
+                Detener — {String(Math.floor(recordingTime / 60)).padStart(2, "0")}:{String(recordingTime % 60).padStart(2, "0")}
+              </Button>
             ) : (
-              <div className="space-y-3">
-                {notes.map((note) => {
-                  const isExpanded = expandedNotes.has(note.id);
-                  return (
-                    <Card key={note.id}>
-                      <CardContent className="pt-4">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2">
-                              {note.type === "AUDIO_TRANSCRIPT" ? (
-                                <Mic className="text-muted-foreground size-4 shrink-0" />
-                              ) : (
-                                <FileText className="text-muted-foreground size-4 shrink-0" />
-                              )}
-                              <span className="truncate font-medium">
-                                {note.title || "Sin título"}
-                              </span>
-                              <Badge variant="secondary" className="shrink-0 text-xs">
-                                {note.type === "AUDIO_TRANSCRIPT" ? "Transcripción" : "Texto"}
-                              </Badge>
-                            </div>
-                            <p className="text-muted-foreground mt-1 text-xs">
-                              {format(new Date(note.createdAt), "dd/MM/yyyy HH:mm")}
-                              {note.session &&
-                                ` — Sesión: ${format(new Date(note.session.startTime), "dd/MM/yyyy")}`}
-                            </p>
-                          </div>
-                          <div className="flex shrink-0 gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setEditingNote(note);
-                                setNoteDialogOpen(true);
-                              }}
-                            >
-                              <Pencil className="size-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteNote(note.id)}
-                            >
-                              <Trash2 className="size-4" />
-                            </Button>
-                          </div>
-                        </div>
-
-                        {/* Content preview / expanded */}
-                        <div className="mt-3">
-                          <p className="text-sm whitespace-pre-wrap">
-                            {isExpanded
-                              ? note.content
-                              : note.content.length > 200
-                                ? note.content.slice(0, 200) + "..."
-                                : note.content}
-                          </p>
-
-                          {isExpanded && note.summary && (
-                            <>
-                              <Separator className="my-3" />
-                              <div>
-                                <p className="text-muted-foreground mb-1 text-xs font-semibold uppercase tracking-wide">
-                                  Resumen IA
-                                </p>
-                                <p className="text-sm whitespace-pre-wrap">{note.summary}</p>
-                              </div>
-                            </>
-                          )}
-
-                          {(note.content.length > 200 || note.summary) && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="mt-2 h-auto p-0 text-xs"
-                              onClick={() => toggleExpanded(note.id)}
-                            >
-                              {isExpanded ? (
-                                <>
-                                  <ChevronUp className="mr-1 size-3" />
-                                  Ver menos
-                                </>
-                              ) : (
-                                <>
-                                  <ChevronDown className="mr-1 size-3" />
-                                  Ver más
-                                </>
-                              )}
-                            </Button>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
+              <Button variant="outline" size="sm" onClick={startRecording} className="rounded-xl">
+                <Mic className="mr-2 size-4" />
+                Grabar
+              </Button>
             )}
           </div>
 
-          {/* Note Dialog (create/edit) */}
+          {notesLoading ? (
+            <div className="flex min-h-[120px] items-center justify-center">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            </div>
+          ) : notes.length === 0 ? (
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#EFEFEF] py-12">
+              <FileText className="size-10 text-muted-foreground/50" />
+              <p className="mt-3 text-[15px] text-muted-foreground">Sin notas clínicas aún</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {notes.map((note) => {
+                const isExpanded = expandedNotes.has(note.id);
+                return (
+                  <div
+                    key={note.id}
+                    className="overflow-hidden rounded-2xl bg-card border border-[#EFEFEF]"
+                  >
+                    <div className="p-4">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            {note.type === "AUDIO_TRANSCRIPT" ? (
+                              <Mic className="size-4 shrink-0 text-muted-foreground" />
+                            ) : (
+                              <FileText className="size-4 shrink-0 text-muted-foreground" />
+                            )}
+                            <span className="font-medium">{note.title || "Sin título"}</span>
+                            <Badge variant="secondary" className="text-[11px] font-medium">
+                              {note.type === "AUDIO_TRANSCRIPT" ? "Transcripción" : "Texto"}
+                            </Badge>
+                          </div>
+                          <p className="mt-1 text-[13px] text-muted-foreground">
+                            {format(new Date(note.createdAt), "dd/MM/yyyy HH:mm", { locale: es })}
+                            {note.session && ` — ${format(new Date(note.session.startTime), "dd/MM/yyyy")}`}
+                          </p>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8 rounded-lg"
+                            onClick={() => {
+                              setEditingNote(note);
+                              setNoteDialogOpen(true);
+                            }}
+                          >
+                            <Pencil className="size-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8 rounded-lg"
+                            onClick={() => handleDeleteNote(note.id)}
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="mt-3">
+                        <p className="whitespace-pre-wrap text-[15px]">
+                          {isExpanded
+                            ? note.content
+                            : note.content.length > 200
+                              ? note.content.slice(0, 200) + "..."
+                              : note.content}
+                        </p>
+
+                        {isExpanded && note.summary && (
+                          <>
+                            <Separator className="my-3" />
+                            <p className="text-[13px] font-medium uppercase tracking-wider text-muted-foreground">Resumen IA</p>
+                            <p className="mt-1 whitespace-pre-wrap text-[15px]">{note.summary}</p>
+                          </>
+                        )}
+
+                        {(note.content.length > 200 || note.summary) && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="mt-2 h-auto p-0 text-[13px]"
+                            onClick={() => toggleExpanded(note.id)}
+                          >
+                            {isExpanded ? <><ChevronUp className="mr-1 size-3" /> Ver menos</> : <><ChevronDown className="mr-1 size-3" /> Ver más</>}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
           <Dialog open={noteDialogOpen} onOpenChange={setNoteDialogOpen}>
-            <DialogContent>
+            <DialogContent className="rounded-2xl sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>{editingNote ? "Editar nota" : "Nueva nota"}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSaveNote} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="note-title">Título</Label>
+                  <Label htmlFor="note-title" className="text-[13px] font-medium">Título</Label>
                   <Input
                     id="note-title"
                     name="title"
                     defaultValue={editingNote?.title ?? ""}
-                    placeholder="Notas de sesión, ingreso, seguimiento..."
+                    placeholder="Notas de sesión..."
+                    className="rounded-xl"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="note-content">Contenido</Label>
+                  <Label htmlFor="note-content" className="text-[13px] font-medium">Contenido</Label>
                   <Textarea
                     id="note-content"
                     name="content"
                     defaultValue={editingNote?.content ?? ""}
-                    rows={8}
+                    rows={6}
                     required
-                    placeholder="Escribe tus notas clínicas aquí..."
+                    placeholder="Escribe tus notas clínicas..."
+                    className="rounded-xl"
                   />
                 </div>
                 {patient.sessions.length > 0 && (
                   <div className="space-y-2">
-                    <Label htmlFor="note-session">Vincular a sesión (opcional)</Label>
+                    <Label htmlFor="note-session" className="text-[13px] font-medium">Vincular a sesión</Label>
                     <select
                       id="note-session"
                       name="sessionId"
                       defaultValue={editingNote?.sessionId ?? ""}
-                      className="border-input bg-background flex h-9 w-full rounded-md border px-3 py-1 text-sm"
+                      className="bg-card h-11 w-full rounded-xl px-4 text-[15px] border border-[#EFEFEF]"
                     >
                       <option value="">Sin sesión</option>
                       {patient.sessions.map((s) => (
@@ -604,7 +578,7 @@ export default function PatientDetailPage() {
                   </div>
                 )}
                 <DialogFooter>
-                  <Button type="submit" disabled={noteSaving}>
+                  <Button type="submit" disabled={noteSaving} className="rounded-xl">
                     {noteSaving ? "Guardando..." : "Guardar"}
                   </Button>
                 </DialogFooter>
@@ -613,40 +587,33 @@ export default function PatientDetailPage() {
           </Dialog>
         </TabsContent>
 
-        {/* Sessions Tab */}
         <TabsContent value="sessions">
-          <Card>
-            <CardHeader>
-              <CardTitle>Historial de sesiones</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {patient.sessions.length === 0 ? (
-                <p className="text-muted-foreground">Sin sesiones aún</p>
-              ) : (
-                <div className="space-y-2">
-                  {patient.sessions.map((s) => (
-                    <div
-                      key={s.id}
-                      className="flex items-center justify-between rounded-md border p-3"
-                    >
-                      <div>
-                        <p className="text-sm font-medium">
-                          {format(new Date(s.startTime), "dd/MM/yyyy HH:mm")} -{" "}
-                          {format(new Date(s.endTime), "HH:mm")}
-                        </p>
-                        {s.notes && (
-                          <p className="text-muted-foreground text-xs">{s.notes}</p>
-                        )}
-                      </div>
-                      <Badge className={statusColors[s.status] ?? ""} variant="secondary">
-                        {SESSION_STATUS_LABELS[s.status] ?? s.status}
-                      </Badge>
+          <div className="overflow-hidden rounded-2xl bg-card border border-[#EFEFEF]">
+            <div className="border-b border-[#EFEFEF] px-4 py-3">
+              <h3 className="font-semibold">Historial de sesiones</h3>
+            </div>
+            {patient.sessions.length === 0 ? (
+              <div className="py-12 text-center">
+                <p className="text-[15px] text-muted-foreground">Sin sesiones aún</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-[#EFEFEF]">
+                {patient.sessions.map((s) => (
+                  <div key={s.id} className="flex items-center justify-between px-4 py-3.5">
+                    <div>
+                      <p className="font-medium">
+                        {format(new Date(s.startTime), "dd MMM yyyy", { locale: es })} — {format(new Date(s.startTime), "HH:mm")}–{format(new Date(s.endTime), "HH:mm")}
+                      </p>
+                      {s.notes && <p className="text-[13px] text-muted-foreground">{s.notes}</p>}
                     </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                    <Badge className={cn("text-[11px] font-medium", statusColors[s.status] ?? "")} variant="secondary">
+                      {SESSION_STATUS_LABELS[s.status] ?? s.status}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </TabsContent>
       </Tabs>
     </div>

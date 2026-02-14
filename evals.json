@@ -1,0 +1,140 @@
+[
+  {
+    "prompt": "Create a glassmorphic card component for a DeFi dashboard showing ETH balance. It should look premium and iOS-native with blur effects.",
+    "expectations": [
+      "Uses BlurView or backdrop-filter for glass effect",
+      "Includes semi-transparent background (0.1-0.25 opacity)",
+      "Has proper blur amount (10-30px)",
+      "Includes text contrast overlay for readability",
+      "Uses iOS typography and spacing",
+      "Supports dark mode",
+      "Has proper iOS shadow",
+      "Uses rounded corners (12-20px)",
+      "Includes accessibility labels"
+    ]
+  },
+  {
+    "prompt": "Build a bottom sheet modal component for transaction details, following iOS design patterns. Should slide up from bottom with spring animation.",
+    "expectations": [
+      "Uses spring animation (not linear timing)",
+      "Includes drag indicator at top",
+      "Slides from bottom (not top or center)",
+      "Has proper Safe Area handling",
+      "Uses iOS modal presentation style",
+      "Implements gesture dismissal",
+      "Has backdrop blur or dimming",
+      "Respects Reduce Motion setting",
+      "Animation duration 200-400ms"
+    ]
+  },
+  {
+    "prompt": "Create an iOS-style grouped list for app settings with proper sections, separators, and navigation chevrons.",
+    "expectations": [
+      "Uses grouped list style (rounded containers)",
+      "Includes section headers in uppercase gray",
+      "Has hairline separators between items",
+      "Uses proper iOS spacing (16px margins)",
+      "Includes chevron icons for navigation",
+      "Has white background on items",
+      "Uses iOS system colors",
+      "Proper touch target sizes (44pt minimum)",
+      "Supports dark mode"
+    ]
+  },
+  {
+    "prompt": "Design a button component with iOS-style haptic feedback and scale animation on press. Should have primary and secondary variants.",
+    "expectations": [
+      "Implements scale animation on press (0.95 scale)",
+      "Uses spring animation for press feedback",
+      "Has primary variant (filled blue)",
+      "Has secondary variant (transparent with blue text)",
+      "Uses iOS system blue (#007AFF)",
+      "Rounded corners (10-14px)",
+      "Proper padding (14px vertical)",
+      "Font size 17pt",
+      "Font weight 600 for primary, 400 for secondary"
+    ]
+  },
+  {
+    "prompt": "Create a navigation header with glassmorphism that blurs content scrolling underneath, iOS style.",
+    "expectations": [
+      "Uses BlurView or backdrop-filter",
+      "Fixed/sticky positioning",
+      "Blurs background content",
+      "Handles Safe Area (status bar)",
+      "Semi-transparent background",
+      "Proper iOS header height (44pt + safe area)",
+      "Supports dark mode",
+      "Smooth transition on scroll",
+      "Includes back button on left (iOS convention)"
+    ]
+  },
+  {
+    "prompt": "Build an input form with iOS-native styling including floating labels and validation states.",
+    "expectations": [
+      "Uses iOS input background color (#F2F2F7 light mode)",
+      "Has rounded corners (10px)",
+      "Proper padding (16px horizontal, 12px vertical)",
+      "Font size 17pt",
+      "Uppercase label above input (13pt gray)",
+      "Error state with red color (#FF3B30)",
+      "Success state with green color (#34C759)",
+      "Proper keyboard type hints",
+      "Auto-capitalize settings appropriate for input type"
+    ]
+  },
+  {
+    "prompt": "Create a card component with liquid glass effect for iOS 26, showing crypto portfolio stats with smooth morphing between states.",
+    "expectations": [
+      "Uses LiquidGlassView or equivalent iOS 26 API",
+      "Implements morphing between glass elements",
+      "Has proper spacing for element merging (20pt)",
+      "Includes tint color customization",
+      "Supports light/dark/system color scheme",
+      "Fallback for older iOS versions",
+      "Smooth transitions with spring animations",
+      "Proper performance optimization"
+    ]
+  },
+  {
+    "prompt": "Design a pull-to-refresh component with iOS-style activity indicator and proper gesture handling.",
+    "expectations": [
+      "Uses RefreshControl component",
+      "iOS blue activity indicator (#007AFF)",
+      "Proper pull-down gesture threshold",
+      "Smooth spring animation",
+      "Indicator appears at top of scroll view",
+      "Haptic feedback on trigger",
+      "Respects Reduce Motion",
+      "Loading state management"
+    ]
+  },
+  {
+    "prompt": "Create an accessible tab bar navigation with iOS design, icons, labels, and proper active states.",
+    "expectations": [
+      "Bottom positioned (iOS standard)",
+      "Active tint color iOS blue (#007AFF)",
+      "Inactive tint color gray (#8E8E93)",
+      "Includes icons (SF Symbols style)",
+      "Text labels under icons",
+      "Blur/translucent background",
+      "Proper accessibility labels",
+      "VoiceOver support",
+      "Badge support for notifications"
+    ]
+  },
+  {
+    "prompt": "Build a micro-interaction for a like button with iOS-style spring animation and color transition.",
+    "expectations": [
+      "Spring animation on tap",
+      "Scale effect (grows then returns)",
+      "Color transition (gray to red)",
+      "Uses iOS system pink (#FF2D55)",
+      "Smooth 300ms duration",
+      "Friction/tension values (7-8, 40)",
+      "Native driver enabled",
+      "Haptic feedback",
+      "Proper touch target (44x44pt)"
+    ]
+  }
+]

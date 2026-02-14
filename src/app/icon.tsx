@@ -12,16 +12,17 @@ export default function Icon() {
       <div
         style={{
           fontSize: 14,
-          background: "#0d9488",
+          background: "#F8F8F8",
           width: "100%",
           height: "100%",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          color: "white",
+          color: "#1C1C1E",
           borderRadius: "20%",
           fontWeight: 700,
           letterSpacing: "-0.02em",
+          border: "1px solid #EFEFEF",
         }}
       >
         PSI

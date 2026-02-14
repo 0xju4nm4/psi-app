@@ -5,9 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 interface WorkingDay {
   start: string;
@@ -48,6 +47,15 @@ const defaultWorkingHours: Record<string, WorkingDay> = {
   sunday: { start: "08:00", end: "12:00", enabled: false },
 };
 
+function SettingRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between gap-3 px-4 py-2.5">
+      <Label className="text-[15px] font-normal shrink-0">{label}</Label>
+      {children}
+    </div>
+  );
+}
+
 export default function SettingsPage() {
   const [settings, setSettings] = useState<SettingsData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -59,9 +67,10 @@ export default function SettingsPage() {
       .then((data) => {
         setSettings({
           ...data,
-          workingHours: data.workingHours && Object.keys(data.workingHours).length > 0
-            ? data.workingHours
-            : defaultWorkingHours,
+          workingHours:
+            data.workingHours && Object.keys(data.workingHours).length > 0
+              ? data.workingHours
+              : defaultWorkingHours,
         });
         setLoading(false);
       });
@@ -74,14 +83,14 @@ export default function SettingsPage() {
     const res = await fetch("/api/settings", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(settings),
+      body: JSON.stringify({ ...settings, reminder1h: false }),
     });
 
     if (res.ok) {
       toast.success("Configuración guardada");
     } else {
       const err = await res.json();
-      toast.error(err.error?.fieldErrors?.[0] || "Error al guardar configuración");
+      toast.error(err.error?.fieldErrors?.[0] || "Error al guardar");
     }
     setSaving(false);
   }
@@ -97,138 +106,156 @@ export default function SettingsPage() {
     });
   }
 
-  if (loading || !settings) return <p className="text-muted-foreground">Cargando configuración...</p>;
+  if (loading || !settings)
+    return (
+      <div className="flex min-h-[200px] items-center justify-center">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    );
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="text-[34px] font-bold tracking-tight">Configuración</h1>
+    <div className="flex flex-col">
+      <div className="mb-5 shrink-0">
+        <h1 className="text-[26px] font-bold tracking-tight">Ajustes</h1>
+        <p className="text-[15px] text-muted-foreground">Configura tu consultorio</p>
+      </div>
 
-      {/* Session settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Configuración de sesiones</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="duration">Duración de sesión (min)</Label>
-              <Input
-                id="duration"
-                type="number"
-                value={settings.sessionDuration}
-                onChange={(e) => setSettings({ ...settings, sessionDuration: parseInt(e.target.value) || 50 })}
-                min={15}
-                max={180}
-              />
+      <div className="grid gap-6 md:grid-cols-[1fr_1fr]">
+        {/* Left: Sesiones + Horario laboral */}
+        <div className="flex flex-col gap-6">
+          <section className="space-y-2">
+            <h2 className="text-[13px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Sesiones
+            </h2>
+            <div className="overflow-hidden rounded-xl bg-card border border-[#EFEFEF]">
+              <div className="divide-y divide-[#EFEFEF]">
+                <SettingRow label="Duración (min)">
+                  <Input
+                    type="number"
+                    value={settings.sessionDuration}
+                    onChange={(e) =>
+                      setSettings({ ...settings, sessionDuration: parseInt(e.target.value) || 50 })
+                    }
+                    min={15}
+                    max={180}
+                    className="h-9 w-24 rounded-lg text-right text-[15px]"
+                  />
+                </SettingRow>
+                <SettingRow label="Buffer (min)">
+                  <Input
+                    type="number"
+                    value={settings.bufferTime}
+                    onChange={(e) =>
+                      setSettings({ ...settings, bufferTime: parseInt(e.target.value) || 0 })
+                    }
+                    min={0}
+                    max={60}
+                    className="h-9 w-24 rounded-lg text-right text-[15px]"
+                  />
+                </SettingRow>
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="buffer">Tiempo entre sesiones (min)</Label>
-              <Input
-                id="buffer"
-                type="number"
-                value={settings.bufferTime}
-                onChange={(e) => setSettings({ ...settings, bufferTime: parseInt(e.target.value) || 0 })}
-                min={0}
-                max={60}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </section>
 
-      {/* Working hours */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Horario laboral</CardTitle>
-          <CardDescription>Configura tus horarios disponibles para cada día</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {DAYS.map((day) => (
-            <div key={day} className="flex items-center gap-3">
-              <label className="flex w-28 items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={settings.workingHours[day]?.enabled ?? false}
-                  onChange={(e) => updateWorkingDay(day, "enabled", e.target.checked)}
-                  className="rounded"
-                />
-                <span className="text-sm">{DAY_LABELS[day]}</span>
-              </label>
-              <Input
-                type="time"
-                value={settings.workingHours[day]?.start ?? "08:00"}
-                onChange={(e) => updateWorkingDay(day, "start", e.target.value)}
-                disabled={!settings.workingHours[day]?.enabled}
-                className="w-32"
-              />
-              <span className="text-sm text-muted-foreground">a</span>
-              <Input
-                type="time"
-                value={settings.workingHours[day]?.end ?? "18:00"}
-                onChange={(e) => updateWorkingDay(day, "end", e.target.value)}
-                disabled={!settings.workingHours[day]?.enabled}
-                className="w-32"
-              />
+          <section className="space-y-2">
+            <h2 className="text-[13px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Horario laboral
+            </h2>
+            <div className="overflow-hidden rounded-xl bg-card border border-[#EFEFEF]">
+              <div className="divide-y divide-[#EFEFEF]">
+                {DAYS.map((day) => (
+                  <div key={day} className="flex items-center gap-3 px-4 py-2">
+                    <label className="flex w-24 cursor-pointer items-center gap-2 shrink-0">
+                      <input
+                        type="checkbox"
+                        checked={settings.workingHours[day]?.enabled ?? false}
+                        onChange={(e) => updateWorkingDay(day, "enabled", e.target.checked)}
+                        className="h-4 w-4 rounded border-border accent-primary"
+                      />
+                      <span className="text-[15px]">{DAY_LABELS[day]}</span>
+                    </label>
+                    <div className="flex flex-1 items-center gap-2 min-w-[160px]">
+                      <Input
+                        type="time"
+                        value={settings.workingHours[day]?.start ?? "08:00"}
+                        onChange={(e) => updateWorkingDay(day, "start", e.target.value)}
+                        disabled={!settings.workingHours[day]?.enabled}
+                        className="h-9 w-[7rem] shrink-0 rounded-lg text-[15px] tabular-nums [&::-webkit-datetime-edit]:text-[15px]"
+                      />
+                      <span className="text-[14px] text-muted-foreground shrink-0">–</span>
+                      <Input
+                        type="time"
+                        value={settings.workingHours[day]?.end ?? "18:00"}
+                        onChange={(e) => updateWorkingDay(day, "end", e.target.value)}
+                        disabled={!settings.workingHours[day]?.enabled}
+                        className="h-9 w-[7rem] shrink-0 rounded-lg text-[15px] tabular-nums [&::-webkit-datetime-edit]:text-[15px]"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
-        </CardContent>
-      </Card>
+          </section>
+        </div>
 
-      {/* Reminders */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recordatorios por SMS</CardTitle>
-          <CardDescription>Configura los recordatorios automáticos enviados a los pacientes por SMS</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <label className="flex items-center gap-2">
+        {/* Right: Recordatorios */}
+        <section className="space-y-2">
+          <h2 className="text-[13px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Recordatorios
+          </h2>
+          <div className="overflow-hidden rounded-xl bg-card border border-[#EFEFEF]">
+            <label className="flex cursor-pointer items-center gap-3 px-4 py-3">
               <input
                 type="checkbox"
                 checked={settings.reminder24h}
                 onChange={(e) => setSettings({ ...settings, reminder24h: e.target.checked })}
-                className="rounded"
+                className="h-4 w-4 rounded border-border accent-primary"
               />
-              <span className="text-sm">Enviar recordatorio 24 horas antes</span>
+              <span className="text-[15px]">24h antes</span>
             </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={settings.reminder1h}
-                onChange={(e) => setSettings({ ...settings, reminder1h: e.target.checked })}
-                className="rounded"
-              />
-              <span className="text-sm">Enviar recordatorio 1 hora antes</span>
-            </label>
+            <div className="border-t border-[#EFEFEF] space-y-3 p-4">
+              <div>
+                <Label className="text-[13px] font-medium text-muted-foreground">
+                  Mensaje (opcional)
+                </Label>
+                <Textarea
+                  value={settings.reminderMessage ?? ""}
+                  onChange={(e) => setSettings({ ...settings, reminderMessage: e.target.value })}
+                  placeholder="ej., Llega 5 min antes"
+                  rows={3}
+                  className="mt-1 min-h-[80px] rounded-lg text-[15px]"
+                />
+              </div>
+              <div>
+                <Label className="text-[13px] font-medium text-muted-foreground">
+                  Pago (opcional)
+                </Label>
+                <Textarea
+                  value={settings.paymentReminder ?? ""}
+                  onChange={(e) => setSettings({ ...settings, paymentReminder: e.target.value })}
+                  placeholder="ej., Pago vence antes"
+                  rows={3}
+                  className="mt-1 min-h-[80px] rounded-lg text-[15px]"
+                />
+              </div>
+            </div>
           </div>
+        </section>
+      </div>
 
-          <Separator />
-
-          <div className="space-y-2">
-            <Label htmlFor="reminderMsg">Mensaje de recordatorio personalizado (opcional)</Label>
-            <Textarea
-              id="reminderMsg"
-              value={settings.reminderMessage ?? ""}
-              onChange={(e) => setSettings({ ...settings, reminderMessage: e.target.value })}
-              placeholder="ej., Por favor llega 5 minutos antes"
-              rows={2}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="paymentMsg">Mensaje de recordatorio de pago (opcional)</Label>
-            <Textarea
-              id="paymentMsg"
-              value={settings.paymentReminder ?? ""}
-              onChange={(e) => setSettings({ ...settings, paymentReminder: e.target.value })}
-              placeholder="ej., El pago de R$200 vence antes de la sesión por PIX"
-              rows={2}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Button onClick={handleSave} disabled={saving} className="w-full">
-        {saving ? "Guardando..." : "Guardar configuración"}
+      <Button
+        onClick={handleSave}
+        disabled={saving}
+        className="mt-4 shrink-0 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
+      >
+        {saving ? (
+          <>
+            <Loader2 className="mr-2 size-4 animate-spin" />
+            Guardando...
+          </>
+        ) : (
+          "Guardar"
+        )}
       </Button>
     </div>
   );

@@ -42,16 +42,26 @@ export function Header() {
   return (
     <>
       {/* Desktop top header */}
-      <header className="sticky top-0 z-40 hidden border-b border-border/50 glass-heavy md:block">
-        <div className="mx-auto flex h-14 max-w-5xl items-center px-4 sm:px-6 lg:px-8">
-          <Link
-            href="/dashboard"
-            className="mr-8 text-lg font-semibold tracking-tight"
-          >
-            PsiApp
-          </Link>
+      <header className="sticky top-0 z-40 hidden border-b border-[#EFEFEF] bg-background safe-top md:block">
+        <div className="flex h-14 w-full items-center">
+          <div className="flex flex-1 items-center justify-start pl-4 sm:pl-6">
+            <Link
+              href="/dashboard"
+              className="flex items-center"
+              aria-label="PsiApp"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/icon"
+                alt=""
+                width={28}
+                height={28}
+                className="rounded-[20%]"
+              />
+            </Link>
+          </div>
 
-          <nav className="flex flex-1 items-center gap-1">
+          <nav className="flex w-[62.5%] shrink-0 items-center justify-start gap-1 px-4">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname.startsWith(item.href);
@@ -73,36 +83,38 @@ export function Header() {
             })}
           </nav>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative size-9 rounded-full">
-                <Avatar>
-                  {session?.user?.image && (
-                    <AvatarImage
-                      src={session.user.image}
-                      alt={session.user.name ?? ""}
-                    />
-                  )}
-                  <AvatarFallback>{initials}</AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem
-                onClick={() => signOut({ callbackUrl: "/login" })}
-                className="cursor-pointer"
-              >
-                <LogOut className="mr-2 size-4" />
-                Cerrar sesión
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex flex-1 items-center justify-end pr-4 sm:pr-6">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative size-9 rounded-full">
+                  <Avatar>
+                    {session?.user?.image && (
+                      <AvatarImage
+                        src={session.user.image}
+                        alt={session.user.name ?? ""}
+                      />
+                    )}
+                    <AvatarFallback>{initials}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem
+                  onClick={() => signOut({ callbackUrl: "/login" })}
+                  className="cursor-pointer"
+                >
+                  <LogOut className="mr-2 size-4" />
+                  Cerrar sesión
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </header>
 
       {/* Mobile bottom tab bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/30 glass-heavy safe-bottom md:hidden">
-        <div className="flex h-[52px] items-end justify-around px-2">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#EFEFEF] bg-background md:hidden py-2">
+        <div className="flex h-[52px] items-center justify-around px-2">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname.startsWith(item.href);
@@ -111,7 +123,7 @@ export function Header() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex min-w-[64px] flex-col items-center gap-0.5 pb-1 pt-1.5 text-[10px] font-medium transition-colors",
+                  "flex min-w-[64px] flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-medium transition-colors",
                   isActive ? "text-primary" : "text-muted-foreground"
                 )}
               >
