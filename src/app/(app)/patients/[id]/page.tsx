@@ -316,14 +316,14 @@ export default function PatientDetailPage() {
     <div className="space-y-6">
       <NextLink
         href="/patients"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        className="inline-flex items-center gap-1.5 text-sm text-primary transition-colors hover:text-primary/80"
       >
         <ArrowLeft className="size-4" />
         Pacientes
       </NextLink>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-semibold">{patient.name}</h1>
+        <h1 className="text-[28px] font-bold tracking-tight">{patient.name}</h1>
         <div className="flex gap-2">
           {bookingSlug && (
             <Button variant="outline" size="sm" onClick={copyBookingLink}>

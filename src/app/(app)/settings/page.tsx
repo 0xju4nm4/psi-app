@@ -101,7 +101,7 @@ export default function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="text-2xl font-semibold">Configuración</h1>
+      <h1 className="text-[34px] font-bold tracking-tight">Configuración</h1>
 
       {/* Session settings */}
       <Card>

@@ -69,11 +69,11 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Panel</h1>
+      <h1 className="text-[34px] font-bold tracking-tight">Panel</h1>
 
       {/* Quick stats — always 3 cols, compact */}
       <div className="grid grid-cols-3 gap-3">
-        <Card className="p-0">
+        <Card className="gap-0 border-0 p-0 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.08)]">
           <CardContent className="px-3 py-3 sm:px-4 sm:py-4">
             <p className="text-xs text-muted-foreground sm:text-sm">Hoy</p>
             <p className="text-2xl font-bold sm:text-3xl">
@@ -81,7 +81,7 @@ export default function DashboardPage() {
             </p>
           </CardContent>
         </Card>
-        <Card className="p-0">
+        <Card className="gap-0 border-0 p-0 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.08)]">
           <CardContent className="px-3 py-3 sm:px-4 sm:py-4">
             <p className="text-xs text-muted-foreground sm:text-sm">Semana</p>
             <p className="text-2xl font-bold sm:text-3xl">
@@ -89,7 +89,7 @@ export default function DashboardPage() {
             </p>
           </CardContent>
         </Card>
-        <Card className="p-0">
+        <Card className="gap-0 border-0 p-0 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.08)]">
           <CardContent className="px-3 py-3 sm:px-4 sm:py-4">
             <p className="text-xs text-muted-foreground sm:text-sm">Próximas</p>
             <p className="text-2xl font-bold sm:text-3xl">{upcomingToday.length}</p>

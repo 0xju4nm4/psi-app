@@ -121,7 +121,7 @@ export default function CalendarPage() {
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-semibold">Calendario</h1>
+        <h1 className="text-[34px] font-bold tracking-tight">Calendario</h1>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleSync} disabled={syncing}>
             {syncing ? "Sincronizando..." : "Sincronizar Google Calendar"}
@@ -192,7 +192,7 @@ export default function CalendarPage() {
       </div>
 
       {/* Week grid */}
-      <div className="overflow-x-auto rounded-md border">
+      <div className="overflow-x-auto rounded-xl border border-border/50">
         <div className="min-w-[800px]">
           {/* Header */}
           <div className="grid grid-cols-8 border-b">

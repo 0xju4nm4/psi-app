@@ -6,10 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/50">
+    <div className="flex min-h-screen items-center justify-center bg-background">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">PSI APP</CardTitle>
+          <CardTitle className="text-[28px] font-bold tracking-tight">PsiApp</CardTitle>
           <CardDescription>
             Inicia sesión para gestionar tu calendario, pacientes y citas
           </CardDescription>

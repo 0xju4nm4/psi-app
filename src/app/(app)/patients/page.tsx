@@ -37,7 +37,7 @@ export default function PatientsPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-semibold">Pacientes</h1>
+        <h1 className="text-[34px] font-bold tracking-tight">Pacientes</h1>
         <Link href="/patients/new">
           <Button size="sm">Agregar paciente</Button>
         </Link>
@@ -60,8 +60,8 @@ export default function PatientsPage() {
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {patients.map((patient) => (
             <Link key={patient.id} href={`/patients/${patient.id}`}>
-              <Card className="cursor-pointer p-0 transition-shadow hover:shadow-md">
-                <CardContent className="px-3 py-2.5">
+              <Card className="cursor-pointer gap-0 p-0 transition-all duration-200 active:scale-[0.98] hover:shadow-md">
+                <CardContent className="px-4 py-3">
                   <h3 className="text-sm font-medium">{patient.name}</h3>
                   <p className="text-xs text-muted-foreground">{patient.phone}</p>
                   {patient.email && (
