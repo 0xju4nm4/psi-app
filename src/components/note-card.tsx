@@ -16,7 +16,9 @@ import {
   ChevronDown,
   ChevronUp,
   X,
+  Eye,
 } from "lucide-react";
+import NextLink from "next/link";
 import { AnnotatedText } from "@/components/annotated-text";
 import { SummaryRefiner } from "@/components/summary-refiner";
 
@@ -204,6 +206,15 @@ export function NoteCard({
             </p>
           </div>
           <div className="flex gap-1">
+            <NextLink href={`/patients/${patientId}/notes/${note.id}`}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-8 rounded-lg"
+              >
+                <Eye className="size-4" />
+              </Button>
+            </NextLink>
             {!editing && (
               <Button
                 variant="ghost"
