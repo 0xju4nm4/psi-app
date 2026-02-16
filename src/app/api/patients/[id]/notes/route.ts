@@ -19,6 +19,10 @@ export async function GET(
       session: {
         select: { id: true, startTime: true, status: true },
       },
+      comments: {
+        where: { resolved: false },
+        orderBy: { startOffset: "asc" },
+      },
     },
   });
 

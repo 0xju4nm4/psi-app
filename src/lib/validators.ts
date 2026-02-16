@@ -47,8 +47,23 @@ export const clinicalNoteSchema = z.object({
   sessionId: z.string().optional(),
 });
 
+export const noteCommentSchema = z.object({
+  field: z.enum(["content", "summary"]),
+  quotedText: z.string().min(1),
+  startOffset: z.number().int().min(0),
+  endOffset: z.number().int().min(0),
+  body: z.string().min(1, "El comentario es requerido"),
+});
+
+export const noteCommentUpdateSchema = z.object({
+  body: z.string().min(1).optional(),
+  resolved: z.boolean().optional(),
+});
+
 export type PatientInput = z.infer<typeof patientSchema>;
 export type SessionInput = z.infer<typeof sessionSchema>;
 export type BookingInput = z.infer<typeof bookingSchema>;
 export type SettingsInput = z.infer<typeof settingsSchema>;
 export type ClinicalNoteInput = z.infer<typeof clinicalNoteSchema>;
+export type NoteCommentInput = z.infer<typeof noteCommentSchema>;
+export type NoteCommentUpdateInput = z.infer<typeof noteCommentUpdateSchema>;

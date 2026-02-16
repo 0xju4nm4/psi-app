@@ -150,9 +150,28 @@ model ClinicalNote {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  patient Patient         @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  session TherapySession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  patient  Patient         @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  session  TherapySession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  comments NoteComment[]
 
   @@index([patientId])
   @@map("clinical_notes")
+}
+
+model NoteComment {
+  id             String   @id @default(cuid())
+  clinicalNoteId String   @map("clinical_note_id")
+  field          String   // "content" or "summary"
+  quotedText     String   @db.Text @map("quoted_text")
+  startOffset    Int      @map("start_offset")
+  endOffset      Int      @map("end_offset")
+  body           String   @db.Text
+  resolved       Boolean  @default(false)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  clinicalNote ClinicalNote @relation(fields: [clinicalNoteId], references: [id], onDelete: Cascade)
+
+  @@index([clinicalNoteId])
+  @@map("note_comments")
 }

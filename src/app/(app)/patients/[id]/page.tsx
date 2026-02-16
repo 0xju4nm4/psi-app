@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
@@ -25,10 +24,6 @@ import {
   FileText,
   Mic,
   Plus,
-  Pencil,
-  Trash2,
-  ChevronDown,
-  ChevronUp,
   Loader2,
   Square,
   Link,
@@ -36,6 +31,7 @@ import {
 } from "lucide-react";
 import NextLink from "next/link";
 import { cn } from "@/lib/utils";
+import { NoteCard } from "@/components/note-card";
 
 interface TherapySession {
   id: string;
@@ -43,6 +39,17 @@ interface TherapySession {
   endTime: string;
   status: string;
   notes: string | null;
+}
+
+interface NoteComment {
+  id: string;
+  field: string;
+  quotedText: string;
+  startOffset: number;
+  endOffset: number;
+  body: string;
+  resolved: boolean;
+  createdAt: string;
 }
 
 interface ClinicalNote {
@@ -55,6 +62,7 @@ interface ClinicalNote {
   createdAt: string;
   updatedAt: string;
   session: { id: string; startTime: string; status: string } | null;
+  comments?: NoteComment[];
 }
 
 interface Patient {
@@ -85,12 +93,10 @@ export default function PatientDetailPage() {
   const [notes, setNotes] = useState<ClinicalNote[]>([]);
   const [notesLoading, setNotesLoading] = useState(false);
   const [noteDialogOpen, setNoteDialogOpen] = useState(false);
-  const [editingNote, setEditingNote] = useState<ClinicalNote | null>(null);
   const [noteSaving, setNoteSaving] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [recording, setRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
-  const [expandedNotes, setExpandedNotes] = useState<Set<string>>(new Set());
   const [bookingSlug, setBookingSlug] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -188,20 +194,15 @@ export default function PatientDetailPage() {
       sessionId: (formData.get("sessionId") as string) || undefined,
     };
 
-    const url = editingNote
-      ? `/api/patients/${params.id}/notes/${editingNote.id}`
-      : `/api/patients/${params.id}/notes`;
-
-    const res = await fetch(url, {
-      method: editingNote ? "PUT" : "POST",
+    const res = await fetch(`/api/patients/${params.id}/notes`, {
+      method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
 
     if (res.ok) {
-      toast.success(editingNote ? "Nota actualizada" : "Nota creada");
+      toast.success("Nota creada");
       setNoteDialogOpen(false);
-      setEditingNote(null);
       fetchNotes();
     } else {
       toast.error("Error al guardar nota");
@@ -295,15 +296,6 @@ export default function PatientDetailPage() {
       if (streamRef.current) streamRef.current.getTracks().forEach((t) => t.stop());
     };
   }, []);
-
-  function toggleExpanded(noteId: string) {
-    setExpandedNotes((prev) => {
-      const next = new Set(prev);
-      if (next.has(noteId)) next.delete(noteId);
-      else next.add(noteId);
-      return next;
-    });
-  }
 
   if (loading)
     return (
@@ -410,13 +402,10 @@ export default function PatientDetailPage() {
             <Button
               size="sm"
               className="rounded-xl"
-              onClick={() => {
-                setEditingNote(null);
-                setNoteDialogOpen(true);
-              }}
+              onClick={() => setNoteDialogOpen(true)}
             >
               <Plus className="mr-2 size-4" />
-              Nueva nota
+              Nueva sesión
             </Button>
             {transcribing ? (
               <Button variant="outline" size="sm" disabled className="rounded-xl">
@@ -447,94 +436,26 @@ export default function PatientDetailPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {notes.map((note) => {
-                const isExpanded = expandedNotes.has(note.id);
-                return (
-                  <div
-                    key={note.id}
-                    className="overflow-hidden rounded-2xl bg-card border border-[#EFEFEF]"
-                  >
-                    <div className="p-4">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            {note.type === "AUDIO_TRANSCRIPT" ? (
-                              <Mic className="size-4 shrink-0 text-muted-foreground" />
-                            ) : (
-                              <FileText className="size-4 shrink-0 text-muted-foreground" />
-                            )}
-                            <span className="font-medium">{note.title || "Sin título"}</span>
-                            <Badge variant="secondary" className="text-[11px] font-medium">
-                              {note.type === "AUDIO_TRANSCRIPT" ? "Transcripción" : "Texto"}
-                            </Badge>
-                          </div>
-                          <p className="mt-1 text-[13px] text-muted-foreground">
-                            {format(new Date(note.createdAt), "dd/MM/yyyy HH:mm", { locale: es })}
-                            {note.session && ` — ${format(new Date(note.session.startTime), "dd/MM/yyyy")}`}
-                          </p>
-                        </div>
-                        <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-8 rounded-lg"
-                            onClick={() => {
-                              setEditingNote(note);
-                              setNoteDialogOpen(true);
-                            }}
-                          >
-                            <Pencil className="size-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-8 rounded-lg"
-                            onClick={() => handleDeleteNote(note.id)}
-                          >
-                            <Trash2 className="size-4" />
-                          </Button>
-                        </div>
-                      </div>
-
-                      <div className="mt-3">
-                        <p className="whitespace-pre-wrap text-[15px]">
-                          {isExpanded
-                            ? note.content
-                            : note.content.length > 200
-                              ? note.content.slice(0, 200) + "..."
-                              : note.content}
-                        </p>
-
-                        {isExpanded && note.summary && (
-                          <>
-                            <Separator className="my-3" />
-                            <p className="text-[13px] font-medium uppercase tracking-wider text-muted-foreground">Resumen IA</p>
-                            <p className="mt-1 whitespace-pre-wrap text-[15px]">{note.summary}</p>
-                          </>
-                        )}
-
-                        {(note.content.length > 200 || note.summary) && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="mt-2 h-auto p-0 text-[13px]"
-                            onClick={() => toggleExpanded(note.id)}
-                          >
-                            {isExpanded ? <><ChevronUp className="mr-1 size-3" /> Ver menos</> : <><ChevronDown className="mr-1 size-3" /> Ver más</>}
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              {notes.map((note) => (
+                <NoteCard
+                  key={note.id}
+                  note={note}
+                  patientId={params.id as string}
+                  onDelete={handleDeleteNote}
+                  onNoteUpdated={(updated) => {
+                    setNotes((prev) =>
+                      prev.map((n) => (n.id === updated.id ? updated : n))
+                    );
+                  }}
+                />
+              ))}
             </div>
           )}
 
           <Dialog open={noteDialogOpen} onOpenChange={setNoteDialogOpen}>
             <DialogContent className="rounded-2xl sm:max-w-md">
               <DialogHeader>
-                <DialogTitle>{editingNote ? "Editar nota" : "Nueva nota"}</DialogTitle>
+                <DialogTitle>Nueva sesión</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSaveNote} className="space-y-4">
                 <div className="space-y-2">
@@ -542,7 +463,7 @@ export default function PatientDetailPage() {
                   <Input
                     id="note-title"
                     name="title"
-                    defaultValue={editingNote?.title ?? ""}
+                    defaultValue=""
                     placeholder="Notas de sesión..."
                     className="rounded-xl"
                   />
@@ -552,7 +473,7 @@ export default function PatientDetailPage() {
                   <Textarea
                     id="note-content"
                     name="content"
-                    defaultValue={editingNote?.content ?? ""}
+                    defaultValue=""
                     rows={6}
                     required
                     placeholder="Escribe tus notas clínicas..."
@@ -565,7 +486,7 @@ export default function PatientDetailPage() {
                     <select
                       id="note-session"
                       name="sessionId"
-                      defaultValue={editingNote?.sessionId ?? ""}
+                      defaultValue=""
                       className="bg-card h-11 w-full rounded-xl px-4 text-[15px] border border-[#EFEFEF]"
                     >
                       <option value="">Sin sesión</option>
