@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/collapsible";
 import { toast } from "sonner";
 import { Loader2, ChevronDown } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface WorkingDay {
   start: string;
@@ -119,7 +120,12 @@ export default function SettingsPage() {
     );
 
   return (
-    <div className="flex flex-col">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+      animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+      className="flex flex-col"
+    >
       <div className="mb-5 shrink-0">
         <h1 className="text-[26px] font-bold tracking-tight">Ajustes</h1>
         <p className="text-[15px] text-muted-foreground">Configura tu consultorio</p>
@@ -298,6 +304,6 @@ export default function SettingsPage() {
           "Guardar"
         )}
       </Button>
-    </div>
+    </motion.div>
   );
 }

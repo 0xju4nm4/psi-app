@@ -21,6 +21,7 @@ import {
 import NextLink from "next/link";
 import { AnnotatedText } from "@/components/annotated-text";
 import { SummaryRefiner } from "@/components/summary-refiner";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface NoteComment {
   id: string;
@@ -237,99 +238,121 @@ export function NoteCard({
         </div>
 
         <div className="mt-3">
-          {editing ? (
-            <div className="space-y-2">
-              <Textarea
-                value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-                rows={8}
-                className="rounded-xl text-[15px]"
-                autoFocus
-              />
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  className="rounded-xl"
-                  onClick={handleSaveEdit}
-                  disabled={saving || !editContent.trim()}
-                >
-                  {saving ? "Guardando..." : "Guardar"}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="rounded-xl"
-                  onClick={cancelEdit}
-                  disabled={saving}
-                >
-                  <X className="mr-1 size-3" />
-                  Cancelar
-                </Button>
-              </div>
-            </div>
-          ) : isExpanded ? (
-            <AnnotatedText
-              text={note.content}
-              field="content"
-              comments={contentComments}
-              onAddComment={handleAddComment}
-              onDeleteComment={handleDeleteComment}
-              className="whitespace-pre-wrap text-[15px]"
-            />
-          ) : (
-            <p className="whitespace-pre-wrap text-[15px]">
-              {note.content.length > 200
-                ? note.content.slice(0, 200) + "..."
-                : note.content}
-            </p>
-          )}
+          <AnimatePresence mode="wait">
+            {editing ? (
+              <motion.div
+                key="editing"
+                initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                exit={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                className="space-y-2"
+              >
+                <Textarea
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  rows={8}
+                  className="rounded-xl text-[15px]"
+                  autoFocus
+                />
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    className="rounded-xl"
+                    onClick={handleSaveEdit}
+                    disabled={saving || !editContent.trim()}
+                  >
+                    {saving ? "Guardando..." : "Guardar"}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="rounded-xl"
+                    onClick={cancelEdit}
+                    disabled={saving}
+                  >
+                    <X className="mr-1 size-3" />
+                    Cancelar
+                  </Button>
+                </div>
+              </motion.div>
+            ) : isExpanded ? (
+              <motion.div
+                key="expanded"
+                initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                exit={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <AnnotatedText
+                  text={note.content}
+                  field="content"
+                  comments={contentComments}
+                  onAddComment={handleAddComment}
+                  onDeleteComment={handleDeleteComment}
+                  className="whitespace-pre-wrap text-[15px]"
+                />
 
-          {isExpanded && !editing && note.summary && (
-            <>
-              <Separator className="my-3" />
-              <div className="flex items-center justify-between">
-                <p className="text-[13px] font-medium uppercase tracking-wider text-muted-foreground">
-                  Resumen IA
+                {note.summary && (
+                  <>
+                    <Separator className="my-3" />
+                    <div className="flex items-center justify-between">
+                      <p className="text-[13px] font-medium uppercase tracking-wider text-muted-foreground">
+                        Resumen IA
+                      </p>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-auto p-0 text-[13px]"
+                        onClick={() => setIsExpanded(false)}
+                      >
+                        <ChevronUp className="mr-1 size-3" /> Ver menos
+                      </Button>
+                    </div>
+                    <AnnotatedText
+                      text={note.summary}
+                      field="summary"
+                      comments={summaryComments}
+                      onAddComment={handleAddComment}
+                      onDeleteComment={handleDeleteComment}
+                      className="mt-1 whitespace-pre-wrap text-[15px]"
+                    />
+                  </>
+                )}
+
+                <SummaryRefiner
+                  noteId={note.id}
+                  patientId={patientId}
+                  currentSummary={note.summary}
+                  onSummaryUpdated={handleSummaryUpdated}
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="collapsed"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <p className="whitespace-pre-wrap text-[15px]">
+                  {note.content.length > 200
+                    ? note.content.slice(0, 200) + "..."
+                    : note.content}
                 </p>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-auto p-0 text-[13px]"
-                  onClick={() => setIsExpanded(false)}
-                >
-                  <ChevronUp className="mr-1 size-3" /> Ver menos
-                </Button>
-              </div>
-              <AnnotatedText
-                text={note.summary}
-                field="summary"
-                comments={summaryComments}
-                onAddComment={handleAddComment}
-                onDeleteComment={handleDeleteComment}
-                className="mt-1 whitespace-pre-wrap text-[15px]"
-              />
-            </>
-          )}
-
-          {isExpanded && !editing && (
-            <SummaryRefiner
-              noteId={note.id}
-              patientId={patientId}
-              currentSummary={note.summary}
-              onSummaryUpdated={handleSummaryUpdated}
-            />
-          )}
-
-          {!isExpanded && !editing && (note.content.length > 200 || note.summary) && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="mt-2 h-auto p-0 text-[13px]"
-              onClick={() => setIsExpanded(true)}
-            >
-              <ChevronDown className="mr-1 size-3" /> Ver más
-            </Button>
-          )}
+                {(note.content.length > 200 || note.summary) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="mt-2 h-auto p-0 text-[13px]"
+                    onClick={() => setIsExpanded(true)}
+                  >
+                    <ChevronDown className="mr-1 size-3" /> Ver más
+                  </Button>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function NewPatientPage() {
   const router = useRouter();
@@ -43,7 +44,12 @@ export default function NewPatientPage() {
   }
 
   return (
-    <div className="mx-auto max-w-lg space-y-6">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+      animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+      className="mx-auto max-w-lg space-y-6"
+    >
       <Link
         href="/patients"
         className="inline-flex items-center gap-2 text-[15px] font-medium text-primary transition-colors hover:text-primary/80"
@@ -85,6 +91,6 @@ export default function NewPatientPage() {
           </div>
         </form>
       </div>
-    </div>
+    </motion.div>
   );
 }

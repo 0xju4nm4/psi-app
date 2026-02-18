@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { Header } from "@/components/layout/header";
 import { SessionProvider } from "next-auth/react";
 import { ChatButton } from "@/components/chat/chat-button";
+import { AnimationWrapper } from "@/components/layout/animation-wrapper";
 
 export default async function AppLayout({
   children,
@@ -20,9 +21,11 @@ export default async function AppLayout({
       <div className="flex h-screen flex-col overflow-hidden">
         <Header />
         <main className="min-h-0 flex-1 overflow-y-auto">
+          <AnimationWrapper>
             <div className="mx-auto w-full max-w-full min-w-0 px-4 py-5 pb-28 sm:px-6 md:w-[62.5%] md:pb-8 lg:px-8">
-            {children}
-          </div>
+              {children}
+            </div>
+          </AnimationWrapper>
         </main>
         <ChatButton />
       </div>

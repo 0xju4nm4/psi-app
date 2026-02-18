@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { UserPlus, Search, ChevronRight, Users } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface Patient {
   id: string;
@@ -60,63 +61,92 @@ export default function PatientsPage() {
         />
       </div>
 
-      {loading ? (
-        <div className="flex min-h-[200px] items-center justify-center">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-        </div>
-      ) : patients.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#EFEFEF] py-16">
-          <Users className="size-12 text-muted-foreground/50" />
-          <p className="mt-4 text-[15px] font-medium">
-            {search ? "No hay resultados" : "Sin pacientes aún"}
-          </p>
-          <p className="mt-1 text-[14px] text-muted-foreground">
-            {search
-              ? "Prueba con otro término de búsqueda"
-              : "Agrega tu primer paciente para comenzar"}
-          </p>
-          {!search && (
-            <Link href="/patients/new" className="mt-4">
-              <Button size="sm" className="rounded-xl">
-                <UserPlus className="mr-2 size-4" />
-                Agregar paciente
-              </Button>
-            </Link>
-          )}
-        </div>
-      ) : (
-        <div className="overflow-hidden rounded-2xl bg-card border border-[#EFEFEF]">
-          <div className="divide-y divide-[#EFEFEF]">
-            {patients.map((patient) => (
-              <Link
-                key={patient.id}
-                href={`/patients/${patient.id}`}
-                className="flex items-center gap-4 px-4 py-4 transition-colors hover:bg-muted/50"
-              >
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">
-                  {patient.name.charAt(0).toUpperCase()}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium">{patient.name}</p>
-                  <p className="text-[13px] text-muted-foreground">{patient.phone}</p>
-                  {patient.email && (
-                    <p className="truncate text-[12px] text-muted-foreground">{patient.email}</p>
-                  )}
-                  {patient.sessions.length > 0 && (
-                    <Badge
-                      variant="secondary"
-                      className="mt-1.5 text-[11px] font-medium bg-primary/10 text-primary border-0"
-                    >
-                      Próxima: {format(new Date(patient.sessions[0].startTime), "dd MMM HH:mm", { locale: es })}
-                    </Badge>
-                  )}
-                </div>
-                <ChevronRight className="size-5 shrink-0 text-muted-foreground" />
+      <AnimatePresence mode="wait">
+        {loading ? (
+          <motion.div
+            key="loading"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="flex min-h-[200px] items-center justify-center"
+          >
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          </motion.div>
+        ) : patients.length === 0 ? (
+          <motion.div
+            key="empty"
+            initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+            exit={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#EFEFEF] py-16"
+          >
+            <Users className="size-12 text-muted-foreground/50" />
+            <p className="mt-4 text-[15px] font-medium">
+              {search ? "No hay resultados" : "Sin pacientes aún"}
+            </p>
+            <p className="mt-1 text-[14px] text-muted-foreground">
+              {search
+                ? "Prueba con otro término de búsqueda"
+                : "Agrega tu primer paciente para comenzar"}
+            </p>
+            {!search && (
+              <Link href="/patients/new" className="mt-4">
+                <Button size="sm" className="rounded-xl">
+                  <UserPlus className="mr-2 size-4" />
+                  Agregar paciente
+                </Button>
               </Link>
-            ))}
-          </div>
-        </div>
-      )}
+            )}
+          </motion.div>
+        ) : (
+          <motion.div
+            key="list"
+            initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+            exit={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden rounded-2xl bg-card border border-[#EFEFEF]"
+          >
+            <div className="divide-y divide-[#EFEFEF]">
+              {patients.map((patient, i) => (
+                <motion.div
+                  key={patient.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1], delay: i * 0.04 }}
+                >
+                  <Link
+                    href={`/patients/${patient.id}`}
+                    className="flex items-center gap-4 px-4 py-4 transition-colors hover:bg-muted/50"
+                  >
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">
+                      {patient.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium">{patient.name}</p>
+                      <p className="text-[13px] text-muted-foreground">{patient.phone}</p>
+                      {patient.email && (
+                        <p className="truncate text-[12px] text-muted-foreground">{patient.email}</p>
+                      )}
+                      {patient.sessions.length > 0 && (
+                        <Badge
+                          variant="secondary"
+                          className="mt-1.5 text-[11px] font-medium bg-primary/10 text-primary border-0"
+                        >
+                          Próxima: {format(new Date(patient.sessions[0].startTime), "dd MMM HH:mm", { locale: es })}
+                        </Badge>
+                      )}
+                    </div>
+                    <ChevronRight className="size-5 shrink-0 text-muted-foreground" />
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

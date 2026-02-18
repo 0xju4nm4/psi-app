@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { AnnotatedText } from "@/components/annotated-text";
 import { SummaryRefiner } from "@/components/summary-refiner";
+import { motion } from "framer-motion";
 
 interface NoteComment {
   id: string;
@@ -147,7 +148,12 @@ export default function NoteDetailPage() {
   const summaryComments = comments.filter((c) => c.field === "summary");
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+      animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+      className="space-y-6"
+    >
       <NextLink
         href={`/patients/${patientId}`}
         className="inline-flex items-center gap-2 text-[15px] font-medium text-primary transition-colors hover:text-primary/80"
@@ -284,6 +290,6 @@ export default function NoteDetailPage() {
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

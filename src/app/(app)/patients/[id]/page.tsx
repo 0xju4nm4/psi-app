@@ -32,6 +32,7 @@ import {
 import NextLink from "next/link";
 import { cn } from "@/lib/utils";
 import { NoteCard } from "@/components/note-card";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface TherapySession {
   id: string;
@@ -306,7 +307,12 @@ export default function PatientDetailPage() {
   if (!patient) return <p className="text-muted-foreground">Paciente no encontrado</p>;
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+      animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+      className="space-y-6"
+    >
       <NextLink
         href="/patients"
         className="inline-flex items-center gap-2 text-[15px] font-medium text-primary transition-colors hover:text-primary/80"
@@ -425,32 +431,61 @@ export default function PatientDetailPage() {
             )}
           </div>
 
-          {notesLoading ? (
-            <div className="flex min-h-[120px] items-center justify-center">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-            </div>
-          ) : notes.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#EFEFEF] py-12">
-              <FileText className="size-10 text-muted-foreground/50" />
-              <p className="mt-3 text-[15px] text-muted-foreground">Sin notas clínicas aún</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {notes.map((note) => (
-                <NoteCard
-                  key={note.id}
-                  note={note}
-                  patientId={params.id as string}
-                  onDelete={handleDeleteNote}
-                  onNoteUpdated={(updated) => {
-                    setNotes((prev) =>
-                      prev.map((n) => (n.id === updated.id ? updated : n))
-                    );
-                  }}
-                />
-              ))}
-            </div>
-          )}
+          <AnimatePresence mode="wait">
+            {notesLoading ? (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="flex min-h-[120px] items-center justify-center"
+              >
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              </motion.div>
+            ) : notes.length === 0 ? (
+              <motion.div
+                key="empty"
+                initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                exit={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#EFEFEF] py-12"
+              >
+                <FileText className="size-10 text-muted-foreground/50" />
+                <p className="mt-3 text-[15px] text-muted-foreground">Sin notas clínicas aún</p>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="notes"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-3"
+              >
+                {notes.map((note, i) => (
+                  <motion.div
+                    key={note.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1], delay: i * 0.05 }}
+                  >
+                    <NoteCard
+                      note={note}
+                      patientId={params.id as string}
+                      onDelete={handleDeleteNote}
+                      onNoteUpdated={(updated) => {
+                        setNotes((prev) =>
+                          prev.map((n) => (n.id === updated.id ? updated : n))
+                        );
+                      }}
+                    />
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <Dialog open={noteDialogOpen} onOpenChange={setNoteDialogOpen}>
             <DialogContent className="rounded-2xl sm:max-w-md">
@@ -537,6 +572,6 @@ export default function PatientDetailPage() {
           </div>
         </TabsContent>
       </Tabs>
-    </div>
+    </motion.div>
   );
 }

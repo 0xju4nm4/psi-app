@@ -14,6 +14,7 @@ import { es } from "date-fns/locale";
 import { SESSION_STATUS_LABELS } from "@/lib/constants";
 import { Clock, ChevronRight, ChevronLeft, Plus, RefreshCw, Loader2, LayoutList, Grid3x3 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface Patient {
   id: string;
@@ -435,123 +436,159 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Lista view */}
-        {viewMode === "agenda" && (
-          <div className="overflow-hidden rounded-2xl bg-card border border-[#EFEFEF]">
-            <div className="border-b border-[#EFEFEF] px-4 py-2.5">
-              <p className="text-[15px] font-medium">
-                {format(selectedDate, "EEEE d 'de' MMMM", { locale: es })}
-              </p>
-            </div>
-            <div>
+        {/* Lista / Semana view — animated on switch */}
+        <AnimatePresence mode="wait">
+          {viewMode === "agenda" ? (
+            <motion.div
+              key="agenda"
+              initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+              exit={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="overflow-hidden rounded-2xl bg-card border border-[#EFEFEF]"
+            >
+              <div className="border-b border-[#EFEFEF] px-4 py-2.5">
+                <p className="text-[15px] font-medium">
+                  {format(selectedDate, "EEEE d 'de' MMMM", { locale: es })}
+                </p>
+              </div>
+              <div>
+                <AnimatePresence mode="wait">
+                  {loading ? (
+                    <motion.div
+                      key="loading"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="flex min-h-[120px] items-center justify-center"
+                    >
+                      <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                    </motion.div>
+                  ) : selectedDaySessions.length === 0 ? (
+                    <motion.div
+                      key="empty"
+                      initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+                      animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                      exit={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+                      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                      className="flex items-center justify-center py-12"
+                    >
+                      <p className="text-[15px] text-muted-foreground">Sin sesiones</p>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="sessions"
+                      initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+                      animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                      exit={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+                      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                      className="divide-y divide-[#EFEFEF]"
+                    >
+                      {selectedDaySessions.map((s) => (
+                        <div key={s.id} className="flex items-center gap-4 px-4 py-3.5">
+                          <div className="flex shrink-0 items-center gap-2 text-muted-foreground">
+                            <Clock className="size-4" />
+                            <span className="font-mono text-[13px]">
+                              {format(new Date(s.startTime), "HH:mm")}
+                            </span>
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate font-medium">
+                              {s.patient?.name || s.guestName || "Sesión"}
+                            </p>
+                            <p className="text-[13px] text-muted-foreground">
+                              {format(new Date(s.startTime), "HH:mm")} –{" "}
+                              {format(new Date(s.endTime), "HH:mm")}
+                            </p>
+                          </div>
+                          <Badge
+                            className={cn(
+                              "shrink-0 text-[11px] font-medium",
+                              statusColors[s.status] ?? ""
+                            )}
+                            variant="secondary"
+                          >
+                            {SESSION_STATUS_LABELS[s.status] ?? s.status}
+                          </Badge>
+                        </div>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="week"
+              initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+              exit={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="overflow-x-auto rounded-2xl bg-card border border-[#EFEFEF]"
+            >
               {loading ? (
-                <div className="flex min-h-[120px] items-center justify-center">
+                <div className="flex min-h-[200px] items-center justify-center">
                   <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                 </div>
-              ) : selectedDaySessions.length === 0 ? (
-                <div className="flex items-center justify-center py-12">
-                  <p className="text-[15px] text-muted-foreground">Sin sesiones</p>
-                </div>
               ) : (
-                <div className="divide-y divide-[#EFEFEF]">
-                  {selectedDaySessions.map((s) => (
-                    <div key={s.id} className="flex items-center gap-4 px-4 py-3.5">
-                      <div className="flex shrink-0 items-center gap-2 text-muted-foreground">
-                        <Clock className="size-4" />
-                        <span className="font-mono text-[13px]">
-                          {format(new Date(s.startTime), "HH:mm")}
-                        </span>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-medium">
-                          {s.patient?.name || s.guestName || "Sesión"}
-                        </p>
-                        <p className="text-[13px] text-muted-foreground">
-                          {format(new Date(s.startTime), "HH:mm")} –{" "}
-                          {format(new Date(s.endTime), "HH:mm")}
-                        </p>
-                      </div>
-                      <Badge
+                <div className="min-w-[600px]">
+                  <div className="grid grid-cols-8 border-b border-[#EFEFEF]">
+                    <div className="p-2" />
+                    {weekDays.map((day) => (
+                      <div
+                        key={day.toISOString()}
                         className={cn(
-                          "shrink-0 text-[11px] font-medium",
-                          statusColors[s.status] ?? ""
+                          "p-2 text-center",
+                          isSameDay(day, today) && "bg-primary/10 text-primary"
                         )}
-                        variant="secondary"
                       >
-                        {SESSION_STATUS_LABELS[s.status] ?? s.status}
-                      </Badge>
+                        <div className="text-[11px] font-medium uppercase text-muted-foreground">
+                          {format(day, "EEE", { locale: es })}
+                        </div>
+                        <div className="text-base font-bold">{format(day, "d")}</div>
+                      </div>
+                    ))}
+                  </div>
+                  {HOURS.map((hour) => (
+                    <div
+                      key={hour}
+                      className="grid grid-cols-8 border-b border-[#EFEFEF] last:border-b-0"
+                    >
+                      <div className="p-2 text-right font-mono text-[11px] text-muted-foreground">
+                        {String(hour).padStart(2, "0")}:00
+                      </div>
+                      {weekDays.map((day) => {
+                        const daySessions = getSessionsForDayAndHour(day, hour);
+                        return (
+                          <div
+                            key={day.toISOString()}
+                            className="min-h-[3rem] border-l border-[#EFEFEF] p-1"
+                          >
+                            {daySessions.map((s) => (
+                              <div
+                                key={s.id}
+                                className={cn(
+                                  "rounded-md px-1.5 py-1 text-[10px] text-white",
+                                  statusColorsSolid[s.status] || "bg-blue-500"
+                                )}
+                              >
+                                <div className="truncate font-medium">
+                                  {format(new Date(s.startTime), "HH:mm")}{" "}
+                                  {s.patient?.name || s.guestName || "Sesión"}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })}
                     </div>
                   ))}
                 </div>
               )}
-            </div>
-          </div>
-        )}
-
-        {/* Semana grid view */}
-        {viewMode === "week" && (
-          <div className="overflow-x-auto rounded-2xl bg-card border border-[#EFEFEF]">
-            {loading ? (
-              <div className="flex min-h-[200px] items-center justify-center">
-                <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-              </div>
-            ) : (
-              <div className="min-w-[600px]">
-                <div className="grid grid-cols-8 border-b border-[#EFEFEF]">
-                  <div className="p-2" />
-                  {weekDays.map((day) => (
-                    <div
-                      key={day.toISOString()}
-                      className={cn(
-                        "p-2 text-center",
-                        isSameDay(day, today) && "bg-primary/10 text-primary"
-                      )}
-                    >
-                      <div className="text-[11px] font-medium uppercase text-muted-foreground">
-                        {format(day, "EEE", { locale: es })}
-                      </div>
-                      <div className="text-base font-bold">{format(day, "d")}</div>
-                    </div>
-                  ))}
-                </div>
-                {HOURS.map((hour) => (
-                  <div
-                    key={hour}
-                    className="grid grid-cols-8 border-b border-[#EFEFEF] last:border-b-0"
-                  >
-                    <div className="p-2 text-right font-mono text-[11px] text-muted-foreground">
-                      {String(hour).padStart(2, "0")}:00
-                    </div>
-                    {weekDays.map((day) => {
-                      const daySessions = getSessionsForDayAndHour(day, hour);
-                      return (
-                        <div
-                          key={day.toISOString()}
-                          className="min-h-[3rem] border-l border-[#EFEFEF] p-1"
-                        >
-                          {daySessions.map((s) => (
-                            <div
-                              key={s.id}
-                              className={cn(
-                                "rounded-md px-1.5 py-1 text-[10px] text-white",
-                                statusColorsSolid[s.status] || "bg-blue-500"
-                              )}
-                            >
-                              <div className="truncate font-medium">
-                                {format(new Date(s.startTime), "HH:mm")}{" "}
-                                {s.patient?.name || s.guestName || "Sesión"}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      );
-                    })}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </section>
     </div>
   );
