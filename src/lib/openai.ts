@@ -4,6 +4,47 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+const CHAT_SYSTEM_PROMPT = `Eres un asistente especializado en psicología clínica y gestión de consultorios terapéuticos. Ayudas a psicólogos y terapeutas con:
+
+- Redacción y revisión de notas clínicas y reportes
+- Consultas sobre técnicas terapéuticas (TCC, ACT, psicoanálisis, etc.)
+- Planificación de sesiones y estrategias de intervención
+- Gestión administrativa del consultorio
+- Orientación ética y deontológica
+- Interpretación de evaluaciones psicológicas
+- Psicoeducación para pacientes
+- Revisión de literatura clínica
+
+Responde siempre en español de manera profesional, empática y fundamentada en evidencia. Si se trata de información clínica sensible, recuerda siempre la importancia de la confidencialidad y el juicio profesional del terapeuta.`;
+
+export async function streamChat(
+  messages: { role: "user" | "assistant"; content: string }[]
+): Promise<ReadableStream<Uint8Array>> {
+  const stream = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      { role: "system", content: CHAT_SYSTEM_PROMPT },
+      ...messages,
+    ],
+    stream: true,
+    temperature: 0.7,
+    max_tokens: 2000,
+  });
+
+  const encoder = new TextEncoder();
+  return new ReadableStream({
+    async start(controller) {
+      for await (const chunk of stream) {
+        const text = chunk.choices[0]?.delta?.content ?? "";
+        if (text) {
+          controller.enqueue(encoder.encode(text));
+        }
+      }
+      controller.close();
+    },
+  });
+}
+
 export async function transcribeAudio(file: File): Promise<string> {
   const transcription = await openai.audio.transcriptions.create({
     file,

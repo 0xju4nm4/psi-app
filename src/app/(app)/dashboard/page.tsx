@@ -97,7 +97,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6 font-sans">
       <div>
-        <h1 className="text-[26px] font-bold tracking-tight">Home</h1>
+        <h1 className="text-[26px] font-bold tracking-tight">Bienvenidx</h1>
         <p className="mt-0.5 text-[13px] text-muted-foreground uppercase">
           {format(new Date(), "EEEE d 'de' MMMM", { locale: es })}
         </p>

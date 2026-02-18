@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { Header } from "@/components/layout/header";
 import { SessionProvider } from "next-auth/react";
+import { ChatButton } from "@/components/chat/chat-button";
 
 export default async function AppLayout({
   children,
@@ -23,6 +24,7 @@ export default async function AppLayout({
             {children}
           </div>
         </main>
+        <ChatButton />
       </div>
     </SessionProvider>
   );

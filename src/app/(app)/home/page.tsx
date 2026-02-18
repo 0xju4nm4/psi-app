@@ -97,7 +97,7 @@ export default function HomePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-[26px] font-bold tracking-tight">Bienvenidx</h1>
+        <h1 className="text-[26px] font-bold tracking-tight" style={{ fontFamily: "var(--font-sf-pro)", fontWeight: 700 }}>Bienvenidx</h1>
         <p className="mt-0.5 text-[13px] text-muted-foreground uppercase">
           {format(new Date(), "EEEE d 'de' MMMM", { locale: es })}
         </p>
