@@ -13,7 +13,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Home,
   Calendar,
   Users,
   Settings,
@@ -21,8 +20,7 @@ import {
 } from "lucide-react";
 
 const navItems = [
-  { href: "/home", label: "Home", icon: Home },
-  { href: "/calendar", label: "Calendario", icon: Calendar },
+  { href: "/home", label: "Agenda", icon: Calendar },
   { href: "/patients", label: "Pacientes", icon: Users },
   { href: "/settings", label: "Ajustes", icon: Settings },
 ];
@@ -43,8 +41,8 @@ export function Header() {
     <>
       {/* Desktop top header */}
       <header className="sticky top-0 z-40 hidden border-b border-[#EFEFEF] bg-background safe-top md:block">
-        <div className="flex h-14 w-full items-center">
-          <div className="flex flex-1 items-center justify-start pl-4 sm:pl-6">
+        <div className="relative flex h-14 w-full items-center">
+          <div className="absolute left-4 sm:left-6 flex items-center">
             <Link
               href="/home"
               className="flex items-center"
@@ -61,7 +59,7 @@ export function Header() {
             </Link>
           </div>
 
-          <nav className="flex w-[71.5%] shrink-0 items-center px-4">
+          <nav className="mx-auto flex w-full items-center justify-between md:w-[62.5%] px-4 lg:px-8">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname.startsWith(item.href);
@@ -70,7 +68,7 @@ export function Header() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-[15px] font-medium transition-colors",
+                    "flex items-center gap-2 rounded-lg py-2 text-[15px] font-medium transition-colors",
                     isActive
                       ? "text-primary"
                       : "text-muted-foreground hover:text-foreground"
@@ -83,7 +81,7 @@ export function Header() {
             })}
           </nav>
 
-          <div className="flex flex-1 items-center justify-end pr-4 sm:pr-6">
+          <div className="absolute right-4 sm:right-6 flex items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative size-9 rounded-full">
