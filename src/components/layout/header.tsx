@@ -40,7 +40,7 @@ export function Header() {
   return (
     <>
       {/* Desktop top header */}
-      <header className="sticky top-0 z-40 hidden border-b border-[#EFEFEF] bg-background safe-top md:block">
+      <header className="sticky top-0 z-40 hidden border-b border-[#EFEFEF] bg-background safe-top shadow-[0_1px_6px_rgba(0,0,0,0.05)] md:block">
         <div className="relative flex h-14 w-full items-center">
           <div className="absolute left-4 sm:left-6 flex items-center">
             <Link

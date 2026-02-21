@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { format, startOfDay, endOfDay, startOfWeek, addDays, addWeeks, subWeeks, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
 import { SESSION_STATUS_LABELS } from "@/lib/constants";
-import { Clock, ChevronRight, ChevronLeft, Plus, RefreshCw, Loader2, LayoutList, Grid3x3 } from "lucide-react";
+import { Clock, ChevronRight, ChevronLeft, Plus, RefreshCw, Loader2, LayoutList, Grid3x3, CalendarX } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -181,11 +181,22 @@ export default function HomePage() {
         <div className="flex items-center gap-5">
           {stats ? (
             stats.map((stat, i) => (
-              <div key={stat.label} className={cn("flex flex-col gap-0.5", i > 0 && "border-l border-[#EFEFEF] pl-5")}>
+              <div
+                key={stat.label}
+                className={cn(
+                  "flex flex-col gap-0.5",
+                  i > 0 && "border-l border-[#EFEFEF] pl-5",
+                  stat.label === "Semana" && "cursor-pointer transition-opacity hover:opacity-70"
+                )}
+                onClick={stat.label === "Semana" ? () => setViewMode("week") : undefined}
+              >
                 <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                   {stat.label}
                 </span>
-                <span className="text-[22px] font-bold tabular-nums leading-none">{stat.value}</span>
+                <span className="text-[26px] font-bold tabular-nums leading-none">{stat.value}</span>
+                <span className="text-[11px] text-muted-foreground/60">
+                  {stat.label === "Hoy" ? "sesiones" : stat.label === "Semana" ? "ver semana →" : "en cola"}
+                </span>
               </div>
             ))
           ) : (
@@ -339,6 +350,18 @@ export default function HomePage() {
           </div>
         </div>
 
+        {/* Upcoming sessions today */}
+        {!loading && upcomingToday.length > 0 && viewMode === "agenda" && (
+          <div className="mb-4 flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-2.5">
+            <Clock className="size-4 shrink-0 text-primary" />
+            <p className="text-[13px] font-medium text-primary">
+              {upcomingToday.length === 1
+                ? `Próxima: ${format(new Date(upcomingToday[0].startTime), "HH:mm")} — ${upcomingToday[0].patient?.name || upcomingToday[0].guestName || "Sesión"}`
+                : `${upcomingToday.length} sesiones restantes hoy`}
+            </p>
+          </div>
+        )}
+
         {/* Week navigation */}
         {viewMode === "agenda" ? (
           <div className="mb-4 flex w-full items-center gap-2 rounded-xl bg-card p-2 border border-[#EFEFEF]">
@@ -472,9 +495,17 @@ export default function HomePage() {
                       animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
                       exit={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
                       transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                      className="flex items-center justify-center py-12"
+                      className="flex flex-col items-center justify-center gap-3 py-14"
                     >
-                      <p className="text-[15px] text-muted-foreground">Sin sesiones</p>
+                      <CalendarX className="size-10 text-muted-foreground/40" />
+                      <div className="text-center">
+                        <p className="text-[15px] font-medium text-muted-foreground">Sin sesiones</p>
+                        <p className="text-[13px] text-muted-foreground/60">Nada agendado para este día</p>
+                      </div>
+                      <Button size="sm" variant="outline" className="rounded-xl" onClick={() => setShowNewSession(true)}>
+                        <Plus className="mr-2 size-4" />
+                        Nueva sesión
+                      </Button>
                     </motion.div>
                   ) : (
                     <motion.div

@@ -15,6 +15,12 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -28,6 +34,9 @@ import {
   Square,
   Link,
   Check,
+  MoreHorizontal,
+  Trash2,
+  CalendarX,
 } from "lucide-react";
 import NextLink from "next/link";
 import { cn } from "@/lib/utils";
@@ -341,16 +350,29 @@ export default function PatientDetailPage() {
           <Button variant="outline" size="sm" className="rounded-xl" onClick={() => setEditing(!editing)}>
             {editing ? "Cancelar" : "Editar"}
           </Button>
-          <Button variant="destructive" size="sm" className="rounded-xl" onClick={handleDelete}>
-            Eliminar
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="rounded-xl px-2">
+                <MoreHorizontal className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive cursor-pointer"
+                onClick={handleDelete}
+              >
+                <Trash2 className="mr-2 size-4" />
+                Eliminar paciente
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
-      <Tabs defaultValue="sessions" className="space-y-4">
+      <Tabs defaultValue="clinical-history" className="space-y-4">
         <TabsList className="rounded-xl bg-muted p-1">
-          <TabsTrigger value="sessions" className="rounded-lg">Sesiones</TabsTrigger>
           <TabsTrigger value="clinical-history" className="rounded-lg">Historia Clínica</TabsTrigger>
+          <TabsTrigger value="sessions" className="rounded-lg">Sesiones</TabsTrigger>
           <TabsTrigger value="info" className="rounded-lg">Información</TabsTrigger>
         </TabsList>
 
@@ -549,8 +571,10 @@ export default function PatientDetailPage() {
               <h3 className="font-semibold">Historial de sesiones</h3>
             </div>
             {patient.sessions.length === 0 ? (
-              <div className="py-12 text-center">
+              <div className="flex flex-col items-center justify-center gap-2 py-12">
+                <CalendarX className="size-10 text-muted-foreground/40" />
                 <p className="text-[15px] text-muted-foreground">Sin sesiones aún</p>
+                <p className="text-[13px] text-muted-foreground/60">Las sesiones agendadas aparecerán aquí</p>
               </div>
             ) : (
               <div className="divide-y divide-[#EFEFEF]">

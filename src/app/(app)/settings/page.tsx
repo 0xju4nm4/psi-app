@@ -126,9 +126,26 @@ export default function SettingsPage() {
       transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
       className="flex flex-col"
     >
-      <div className="mb-5 shrink-0">
-        <h1 className="text-[26px] font-bold tracking-tight">Ajustes</h1>
-        <p className="text-[15px] text-muted-foreground">Configura tu consultorio</p>
+      <div className="mb-5 shrink-0 flex items-start justify-between">
+        <div>
+          <h1 className="text-[26px] font-bold tracking-tight">Ajustes</h1>
+          <p className="text-[15px] text-muted-foreground">Configura tu consultorio</p>
+        </div>
+        <Button
+          onClick={handleSave}
+          disabled={saving}
+          size="sm"
+          className="mt-1 rounded-xl"
+        >
+          {saving ? (
+            <>
+              <Loader2 className="mr-2 size-4 animate-spin" />
+              Guardando...
+            </>
+          ) : (
+            "Guardar"
+          )}
+        </Button>
       </div>
 
       <div className="grid gap-6 md:grid-cols-[1fr_1fr]">
@@ -290,20 +307,6 @@ export default function SettingsPage() {
         </Collapsible>
       </div>
 
-      <Button
-        onClick={handleSave}
-        disabled={saving}
-        className="mt-4 shrink-0 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
-      >
-        {saving ? (
-          <>
-            <Loader2 className="mr-2 size-4 animate-spin" />
-            Guardando...
-          </>
-        ) : (
-          "Guardar"
-        )}
-      </Button>
     </motion.div>
   );
 }
