@@ -12,7 +12,7 @@ export default async function AppLayout({
 }) {
   const session = await auth();
 
-  if (!session) {
+  if (!session || (session as any).error === "RefreshAccessTokenError") {
     redirect("/login");
   }
 

@@ -36,7 +36,8 @@ export default {
         token.userId = account.providerAccountId;
       }
 
-      if (token.expiresAt && Date.now() < (token.expiresAt as number) * 1000) {
+      // Return early if token is still valid (or we have no expiry info)
+      if (!token.expiresAt || Date.now() < (token.expiresAt as number) * 1000) {
         return token;
       }
 

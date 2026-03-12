@@ -5,7 +5,9 @@ import authConfig from "@/lib/auth.config";
 const { auth } = NextAuth(authConfig);
 
 export default auth((request) => {
-  if (!request.auth) {
+  const session = request.auth;
+
+  if (!session || (session as any).error === "RefreshAccessTokenError") {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("callbackUrl", request.url);
     return NextResponse.redirect(loginUrl);
