@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { format, startOfDay, endOfDay, startOfWeek, addDays, addWeeks, subWeeks, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
 import { SESSION_STATUS_LABELS } from "@/lib/constants";
-import { Clock, ChevronRight, ChevronLeft, Plus, RefreshCw, Loader2, LayoutList, Grid3x3, CalendarX } from "lucide-react";
+import { Clock, ChevronRight, ChevronLeft, Plus, RefreshCw, Loader2, LayoutList, Grid3x3, CalendarX, Bot, Mic, Loader, CheckCircle2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -26,6 +26,8 @@ interface TherapySession {
   startTime: string;
   endTime: string;
   status: string;
+  botStatus: string;
+  meetLink: string | null;
   notes: string | null;
   guestName: string | null;
   patient: Patient | null;
@@ -50,6 +52,49 @@ const statusColorsSolid: Record<string, string> = {
 };
 
 type ViewMode = "agenda" | "week";
+
+function BotStatusBadge({ status }: { status: string }) {
+  const configs: Record<string, { icon: React.ReactNode; label: string; className: string }> = {
+    JOINING: {
+      icon: <Bot className="size-3 animate-pulse" />,
+      label: "Bot uniéndose",
+      className: "bg-violet-500/15 text-violet-700",
+    },
+    RECORDING: {
+      icon: <Mic className="size-3 animate-pulse" />,
+      label: "Grabando",
+      className: "bg-rose-500/15 text-rose-700",
+    },
+    PROCESSING: {
+      icon: <Loader className="size-3 animate-spin" />,
+      label: "Procesando",
+      className: "bg-amber-500/15 text-amber-700",
+    },
+    DONE: {
+      icon: <CheckCircle2 className="size-3" />,
+      label: "Nota lista",
+      className: "bg-green-500/15 text-green-700",
+    },
+    FAILED: {
+      icon: <AlertCircle className="size-3" />,
+      label: "Bot falló",
+      className: "bg-red-500/15 text-red-600",
+    },
+  };
+
+  const config = configs[status];
+  if (!config) return null;
+
+  return (
+    <Badge
+      className={cn("shrink-0 flex items-center gap-1 text-[11px] font-medium", config.className)}
+      variant="secondary"
+    >
+      {config.icon}
+      {config.label}
+    </Badge>
+  );
+}
 
 export default function HomePage() {
   const [weekSessions, setWeekSessions] = useState<TherapySession[]>([]);
@@ -533,6 +578,9 @@ export default function HomePage() {
                               {format(new Date(s.endTime), "HH:mm")}
                             </p>
                           </div>
+                          {s.meetLink && s.botStatus !== "IDLE" && (
+                            <BotStatusBadge status={s.botStatus} />
+                          )}
                           <Badge
                             className={cn(
                               "shrink-0 text-[11px] font-medium",

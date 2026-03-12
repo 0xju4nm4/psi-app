@@ -55,11 +55,12 @@ export async function createEvent(
     end: Date;
     attendeeEmail?: string;
   }
-): Promise<string> {
+): Promise<{ id: string; hangoutLink: string | null }> {
   const calendar = getCalendarClient(accessToken);
 
   const res = await calendar.events.insert({
     calendarId: "primary",
+    conferenceDataVersion: 1,
     requestBody: {
       summary: event.summary,
       description: event.description,
@@ -68,10 +69,19 @@ export async function createEvent(
       attendees: event.attendeeEmail
         ? [{ email: event.attendeeEmail }]
         : undefined,
+      conferenceData: {
+        createRequest: {
+          requestId: crypto.randomUUID(),
+          conferenceSolutionKey: { type: "hangoutsMeet" },
+        },
+      },
     },
   });
 
-  return res.data.id!;
+  return {
+    id: res.data.id!,
+    hangoutLink: res.data.hangoutLink ?? null,
+  };
 }
 
 export async function updateEvent(

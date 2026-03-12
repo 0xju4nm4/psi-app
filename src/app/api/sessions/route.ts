@@ -49,15 +49,18 @@ export async function POST(req: NextRequest) {
     eventSummary = `Session - ${guestName}`;
   }
 
-  // Create Google Calendar event
+  // Create Google Calendar event with Meet link
   let googleEventId: string | null = null;
+  let meetLink: string | null = null;
   try {
-    googleEventId = await createEvent(session.accessToken, {
+    const calEvent = await createEvent(session.accessToken, {
       summary: eventSummary,
       description: notes || undefined,
       start: new Date(startTime),
       end: new Date(endTime),
     });
+    googleEventId = calEvent.id;
+    meetLink = calEvent.hangoutLink;
   } catch (error) {
     console.error("Failed to create Google Calendar event:", error);
   }
@@ -72,6 +75,7 @@ export async function POST(req: NextRequest) {
       guestPhone: guestPhone || null,
       notes: notes || null,
       googleEventId,
+      meetLink,
     },
     include: { patient: true },
   });

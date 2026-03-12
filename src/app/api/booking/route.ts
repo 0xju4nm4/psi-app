@@ -49,15 +49,18 @@ export async function POST(req: NextRequest) {
   // Create Google Calendar event
   const googleAccount = settings.user.accounts.find((a) => a.provider === "google");
   let googleEventId: string | null = null;
+  let meetLink: string | null = null;
 
   if (googleAccount?.access_token) {
     try {
-      googleEventId = await createEvent(googleAccount.access_token, {
+      const calEvent = await createEvent(googleAccount.access_token, {
         summary: `Session - ${name}`,
         description: `Booked via online booking page\nPhone: ${phone}${email ? `\nEmail: ${email}` : ""}`,
         start: startTime,
         end: endTime,
       });
+      googleEventId = calEvent.id;
+      meetLink = calEvent.hangoutLink;
     } catch (error) {
       console.error("Failed to create Google Calendar event:", error);
     }
@@ -72,6 +75,7 @@ export async function POST(req: NextRequest) {
       guestName: existingPatient ? null : name,
       guestPhone: existingPatient ? null : phone,
       googleEventId,
+      meetLink,
     },
   });
 
